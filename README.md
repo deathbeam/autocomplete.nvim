@@ -5,8 +5,13 @@ This was mostly learning exercise and I also did not needed 90% of stuff existin
 nvim-cmp and wilder provided so yea. Also there might be some bugs and Neovim Nightly also isnt the most
 stable thing ever.  
 
+### LSP documentation
 ![lsp-documentation](/screenshots/lsp-documentation.png)
+
+### LSP signature help
 ![lsp-signature-help](/screenshots/lsp-signature-help.png)
+
+### cmdline completion
 ![cmd-completion](/screenshots/cmd-completion.png)
 
 ## Requirements
