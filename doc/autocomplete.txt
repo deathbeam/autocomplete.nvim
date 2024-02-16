@@ -19,6 +19,13 @@ existing solutions like nvim-cmp and wilder provided so yea. Also there might
 be some bugs and Neovim Nightly also isnt the most stable thing ever.
 
 
+LSP DOCUMENTATION ~
+
+
+LSP SIGNATURE HELP ~
+
+
+CMDLINE COMPLETION ~
 
 
 REQUIREMENTS                     *autocomplete-autocomplete.nvim-requirements*
