@@ -14,9 +14,12 @@ Table of Contents                             *autocomplete-table-of-contents*
 
 Very simple and minimal autocompletion for cmdline and LSP with signature help.
 
-This was mostly learning exercise and I also did not needed 90% of stuff
-existing solutions like nvim-cmp and wilder provided so yea. Also there might
-be some bugs and Neovim Nightly also isnt the most stable thing ever.
+Originally I made this just for my dotfiles as I did not needed most of stuff
+existing plugins provided I had some issues with the ones that were close to
+what I wanted so as a learning exercise I decided to try and implement it by
+myself. Then I just extracted the code to separate plugins in case anyone else
+wanted to use it too. Just a warning, there might be some bugs and as this
+requires Neovim 0.10+ (e.g nightly), that one can also have bugs by itself.
 
 
 LSP DOCUMENTATION ~
