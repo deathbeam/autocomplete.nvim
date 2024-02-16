@@ -1,6 +1,12 @@
 name: Ci
 
-on: [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: write
 
 jobs:
   lint:
@@ -14,11 +20,10 @@ jobs:
           version: latest
           args: --check .
 
-
   docs:
     runs-on: ubuntu-latest
     name: pandoc to vimdoc
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name == 'push' }}
     steps:
       - uses: actions/checkout@v3
       - name: panvimdoc
