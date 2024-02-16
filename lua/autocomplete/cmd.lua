@@ -1,7 +1,8 @@
+local util = require('autocomplete.util')
+
 local M = {}
 
 local state = {
-    timer = nil,
     ns = {
         selection = nil,
         directory = nil,
@@ -51,10 +52,6 @@ end
 
 local function highlight_selection()
     if state.completion.current < 1 or state.completion.current > #state.completion.data then
-        return
-    end
-
-    if not M.config.highlight.selection then
         return
     end
 
@@ -183,7 +180,7 @@ local function cmdline_changed()
             }
 
             state.completion.data[i] = data
-            if M.config.highlight.directories and is_directory then
+            if is_directory then
                 vim.highlight.range(
                     state.window.bufnr,
                     state.ns.directory,
@@ -208,8 +205,7 @@ local function changed_handlers()
         return
     end
 
-    state.timer:stop()
-    state.timer:start(M.config.debounce_delay, 0, vim.schedule_wrap(cmdline_changed))
+    util.debounce('cmdline', M.config.debounce_delay, cmdline_changed)
 end
 
 local function setup_handlers()
@@ -223,7 +219,7 @@ local function setup_handlers()
 end
 
 local function teardown_handlers()
-    state.timer:stop()
+    util.debounce_stop('cmdline')
     state.completion.data = {}
     state.completion.last = nil
 
@@ -245,10 +241,6 @@ M.config = {
         complete = '<C-space>',
         next = '<C-n>',
         previous = '<C-p>',
-    },
-    highlight = {
-        selection = true,
-        directories = true,
     },
     debounce_delay = 100,
     close_on_done = true, -- Close completion window when done (accept/reject)

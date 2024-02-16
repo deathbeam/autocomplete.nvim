@@ -1,34 +1,13 @@
+local util = require('autocomplete.util')
+local methods = vim.lsp.protocol.Methods
+
 local M = {}
 
 local state = {
     ns = nil,
     signature_window = nil,
-    skip_next = false,
-    debounce_cache = {}
+    skip_next = false
 }
-
-local methods = vim.lsp.protocol.Methods
-
-local function debounce(name, ms, func)
-    local entry = state.debounce_cache[name]
-    if entry then
-        entry.timer:stop()
-        if entry.cancel then
-            entry.cancel()
-            entry.cancel = nil
-        end
-    else
-        entry = {
-            timer = vim.uv.new_timer(),
-            cancel = nil
-        }
-        state.debounce_cache[name] = entry
-    end
-
-    entry.timer:start(ms, 0, vim.schedule_wrap(function()
-        entry.cancel = func()
-    end))
-end
 
 local function handle(client, line, col, handler)
     return function (err, result, ctx)
@@ -54,7 +33,7 @@ local function with_client(callback)
     return function(args)
         local bufnr = args.buf
         local clients = vim.lsp.get_clients({ bufnr, method = methods.textDocument_completion })
-        if #clients == 0 then
+        if vim.tbl_isempty(clients) then
             return
         end
 
@@ -71,10 +50,10 @@ local function complete_done(client, bufnr)
         return
     end
 
-    if #(item.additionalTextEdits or {}) == 0 then
-        debounce('textEdits', M.config.debounce_delay, function()
+    if vim.tbl_isempty(item.additionalTextEdits or {}) then
+        util.debounce('textEdits', M.config.debounce_delay, function()
             return request(client, methods.completionItem_resolve, item, function(_, result)
-                if #(result.additionalTextEdits or {}) ~= 0 then
+                if not vim.tbl_isempty(result.additionalTextEdits or {}) then
                     vim.lsp.util.apply_text_edits(result.additionalTextEdits, bufnr, client.offset_encoding)
                 end
             end, bufnr)
@@ -97,7 +76,7 @@ local function complete_changed(client, bufnr)
     local data = vim.fn.complete_info()
     local selected = data.selected
 
-    debounce('info', M.config.debounce_delay, function()
+    util.debounce('info', M.config.debounce_delay, function()
         return request(client, methods.completionItem_resolve, item, function(_, result)
             local info = vim.fn.complete_info()
 
@@ -196,7 +175,7 @@ local function text_changed(client, bufnr)
                 triggerCharacter = c
             }
 
-            debounce('signature', M.config.debounce_delay, function()
+            util.debounce('signature', M.config.debounce_delay, function()
                 return request(client, methods.textDocument_signatureHelp, params, handle(client, line, col, signature_handler), bufnr)
             end)
 
@@ -222,7 +201,7 @@ local function text_changed(client, bufnr)
         }
     end
 
-    debounce('completion', M.config.debounce_delay, function()
+    util.debounce('completion', M.config.debounce_delay, function()
         return request(client, methods.textDocument_completion, params, handle(client, line, col, completion_handler), bufnr)
     end)
 end
