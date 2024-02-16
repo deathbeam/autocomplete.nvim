@@ -50,10 +50,6 @@ require("autocomplete.cmd").setup {
         next = '<C-n>',
         previous = '<C-p>',
     },
-    highlight = {
-        selection = true,
-        directories = true,
-    },
     debounce_delay = 100,
     close_on_done = true, -- Close completion window when done (accept/reject)
 }
