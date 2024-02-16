@@ -61,4 +61,3 @@ jobs:
           luarocks install luacheck
           luarocks install vusted
           vusted ./test
- ./test
