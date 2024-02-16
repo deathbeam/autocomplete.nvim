@@ -1,34 +1,68 @@
-# nvim-plugin-template
-neovim plugin template integration test and doc publish
+# autocomplete.nvim
+Very simple and minimal autocompletion for cmdline and LSP with signature help.  
+
+This was mostly learning exercise and I also did not needed 90% of stuff existing solutions like 
+nvim-cmp and wilder provided so yea. Also there might be some bugs and Neovim Nightly also isnt the most
+stable thing ever.  
+
+## Requirements
+
+Requires **Neovim Nighly/development** version. This version supports stuff like popup menu
+for completion menu and closing windows properly from cmdline callbacks.  
+
+For installation instructions/repository go [here](https://github.com/neovim/neovim)
 
 ## Usage
 
-1. click `use this template` button generate a repo on your github.
-2. clone your plugin repo.open terminal then cd plugin directory.
-3. run `python3 rename.py your-plugin-name` this will replace all `nvim-plugin-template` to your `pluing-name`. 
-   then it will prompt you input `y` or `n` to remove example codes in `init.lua` and
-   `test/plugin_spec.lua`. if you are familiar this repo just input y. if you are first look at this
-   template I suggest you look at them first. after these step the `rename.py` will also auto
-   remove.
+Just require either lsp or cmd module or both and call setup on them (and enable `popup` completeopt).  
+**NOTE**: You dont need to provide the configuration, below is just default config, you can just
+call setup with no arguments for default.
 
-now you have a clean plugin env . enjoy!
+```lua
+-- Enable popup in complete opt for LSP documentation preview
+vim.o.completeopt = 'menuone,noinsert,popup'
 
-## Format
+require("autocomplete.lsp").setup {
+    window = {
+        border = nil, -- Signature border style
+    },
+    debounce_delay = 100
+}
 
-format use `stylua` and provide `.stylua.toml`.
+require("autocomplete.cmd").setup {
+    window = {
+        border = nil,
+        columns = 5,
+        rows = 0.3
+    },
+    mappings = {
+        accept = '<C-y>',
+        reject = '<C-e>',
+        complete = '<C-space>',
+        next = '<C-n>',
+        previous = '<C-p>',
+    },
+    highlight = {
+        selection = true,
+        directories = true,
+    },
+    debounce_delay = 100,
+    close_on_done = true, -- Close completion window when done (accept/reject)
+}
+```
 
-## Test
-use vusted for test install by using `luarocks --lua-version=5.1 install vusted` then run `vusted test`
-for your test cases.
+## Features
 
-create test case in test folder file rule is `foo_spec.lua` with `_spec` more usage please check
-[busted usage](https://lunarmodules.github.io/busted/)
+- LSP autocomplete
+- LSP signature help
+- LSP documentation
+- cmdline autocompletion
 
-## Ci
-Ci support auto generate doc from README and integration test and lint check by `stylua`.
+## Similar projects
 
+I used some of this projects as reference and they are also good alternatives:
 
-## More
-Other usage you can look at my plugins
-
-## License MIT
+- https://github.com/nvimdev/epo.nvim
+- https://github.com/hrsh7th/nvim-cmp
+- https://github.com/smolck/command-completion.nvim
+- https://github.com/gelguy/wilder.nvim
