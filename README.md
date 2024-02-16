@@ -5,6 +5,10 @@ This was mostly learning exercise and I also did not needed 90% of stuff existin
 nvim-cmp and wilder provided so yea. Also there might be some bugs and Neovim Nightly also isnt the most
 stable thing ever.  
 
+![lsp-documentation](/screenshots/lsp-documentation.png)
+![lsp-signature-help](/screenshots/lsp-signature-help.png)
+![cmd-completion](/screenshots/cmd-completion.png)
+
 ## Requirements
 
 Requires **Neovim Nighly/development** version. This version supports stuff like popup menu
@@ -19,9 +23,6 @@ Just require either lsp or cmd module or both and call setup on them (and enable
 call setup with no arguments for default.
 
 ```lua
--- Enable popup in complete opt for LSP documentation preview
-vim.o.completeopt = 'menuone,noinsert,popup'
-
 require("autocomplete.lsp").setup {
     window = {
         border = nil, -- Signature border style
@@ -48,6 +49,27 @@ require("autocomplete.cmd").setup {
     },
     debounce_delay = 100,
     close_on_done = true, -- Close completion window when done (accept/reject)
+}
+```
+
+You also probably want to enable `popup` in completeopt to show documentation preview:
+
+```lua
+vim.o.completeopt = 'menuone,noinsert,popup'
+```
+
+And you also ideally want to set the capabilities so Neovim will fetch documentation and additional text edits
+when resolving completion items:
+
+```lua
+-- Here we grab default Neovim capabilities and extend them with ones we want on top
+local capabilities = vim.tbl_deep_extend('force', 
+    vim.lsp.protocol.make_client_capabilities(), 
+    require('completion.lsp').capabilities())
+
+-- Now set capabilities on your LSP servers
+require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
+    capabilities = capabilities
 }
 ```
 
