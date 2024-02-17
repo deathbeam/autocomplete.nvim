@@ -34,16 +34,6 @@ function M.debounce_stop(name)
     end
 end
 
-function M.handle(client, line, col, handler)
-    return function (err, result, ctx)
-        if err or not result or not vim.api.nvim_buf_is_valid(ctx.bufnr) or not vim.fn.mode() == 'i' then
-            return
-        end
-
-        handler(client, line, col, result, ctx)
-    end
-end
-
 function M.request(client, method, params, handler, bufnr)
     local ok, cancel_id = client.request(method, params, handler, bufnr)
     if not ok then

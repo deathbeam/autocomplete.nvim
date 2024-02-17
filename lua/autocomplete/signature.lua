@@ -15,7 +15,7 @@ local function close_signature_window()
     end
 end
 
-local function signature_handler(client, line, col, result, ctx)
+local function signature_handler(client, result, ctx)
     local triggers = client.server_capabilities.signatureHelpProvider.triggerCharacters
     local ft = vim.bo[ctx.bufnr].filetype
     local lines, hl = vim.lsp.util.convert_signature_help_to_markdown_lines(result, ft, triggers)
@@ -57,7 +57,13 @@ local function text_changed(client, bufnr)
             }
 
             util.debounce('signature', M.config.debounce_delay, function()
-                return util.request(client, methods.textDocument_signatureHelp, params, util.handle(client, line, col, signature_handler), bufnr)
+                return util.request(client, methods.textDocument_signatureHelp, params, function (err, result, ctx)
+                    if err or not result or not vim.api.nvim_buf_is_valid(ctx.bufnr) or not vim.fn.mode() == 'i' then
+                        return
+                    end
+
+                    signature_handler(client,  result, ctx)
+                end, bufnr)
             end)
 
             return

@@ -70,7 +70,7 @@ local function complete_changed(client, bufnr)
     end)
 end
 
-local function completion_handler(client, line, col, result, ctx)
+local function completion_handler(line, col, result)
     local cmp_start = vim.fn.match(line:sub(1, col), '\\k*$')
     local prefix = line:sub(cmp_start + 1, col)
     local items = vim.lsp._completion._lsp_to_complete_items(result, prefix)
@@ -113,7 +113,13 @@ local function text_changed(client, bufnr)
     end
 
     util.debounce('completion', M.config.debounce_delay, function()
-        return util.request(client, methods.textDocument_completion, params, util.handle(client, line, col, completion_handler), bufnr)
+        return util.request(client, methods.textDocument_completion, params, function (err, result, ctx)
+            if err or not result or not vim.api.nvim_buf_is_valid(ctx.bufnr) or not vim.fn.mode() == 'i' then
+                return
+            end
+
+            completion_handler(line, col, result)
+        end, bufnr)
     end)
 end
 
