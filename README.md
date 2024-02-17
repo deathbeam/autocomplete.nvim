@@ -31,9 +31,11 @@ call setup with no arguments for default.
 
 ```lua
 require("autocomplete.lsp").setup {
-    window = {
-        border = nil, -- Signature border style
-    },
+    debounce_delay = 100
+}
+
+require("autocomplete.signature").setup {
+    border = nil, -- Signature help border style
     debounce_delay = 100
 }
 
