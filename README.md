@@ -67,7 +67,7 @@ You also probably want to enable `popup` in completeopt to show documentation pr
 vim.o.completeopt = 'menuone,noinsert,popup'
 ```
 
-If you want to disable <CR> to accept completion (as with autocomplete its disgustingly annoying) you can do this:
+If you want to disable `<CR>` to accept completion (as with autocomplete its disgustingly annoying) you can do this:
 
 ```lua
 -- Disable <CR> to accept (this really should be a mapping, so stupid)
