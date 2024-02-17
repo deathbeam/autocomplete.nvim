@@ -200,7 +200,7 @@ local function cmdline_changed()
     vim.cmd('redraw')
 end
 
-local function changed_handlers()
+local function changed_handler()
     if not is_cmdline() then
         return
     end
@@ -208,17 +208,17 @@ local function changed_handlers()
     util.debounce('cmdline', M.config.debounce_delay, cmdline_changed)
 end
 
-local function setup_handlers()
+local function enter_handler()
     if not is_cmdline() then
         return
     end
 
     state.completion.menuone = string.find(vim.o.completeopt, 'menuone')
     state.completion.noselect = string.find(vim.o.completeopt, 'noselect')
-    changed_handlers()
+    changed_handler()
 end
 
-local function teardown_handlers()
+local function leave_handler()
     util.debounce_stop('cmdline')
     state.completion.data = {}
     state.completion.last = nil
@@ -252,7 +252,6 @@ function M.setup(config)
     -- Wild menu needs to be always disabled otherwise its in background for no reason
     vim.o.wildmenu = false
 
-    state.timer = vim.uv.new_timer()
     state.ns.selection = vim.api.nvim_create_namespace('CmdlineCompletionSelection')
     state.ns.directory = vim.api.nvim_create_namespace('CmdlineCompletionDirectory')
 
@@ -285,25 +284,20 @@ function M.setup(config)
     end
 
     local group = vim.api.nvim_create_augroup('CmdlineCompletion', {})
-    vim.api.nvim_create_autocmd('CmdwinEnter', {
-        desc = 'Tear down cmdline completion handlers',
-        group = group,
-        callback = teardown_handlers,
-    })
     vim.api.nvim_create_autocmd('CmdlineEnter', {
         desc = 'Setup cmdline completion handlers',
         group = group,
-        callback = setup_handlers,
+        callback = enter_handler,
     })
-    vim.api.nvim_create_autocmd('CmdlineLeave', {
+    vim.api.nvim_create_autocmd({ 'CmdlineLeave', 'CmdWinEnter' }, {
         desc = 'Tear down cmdline completion handlers',
         group = group,
-        callback = teardown_handlers,
+        callback = leave_handler,
     })
     vim.api.nvim_create_autocmd('CmdlineChanged', {
         desc = 'Auto update cmdline completion',
         group = group,
-        callback = changed_handlers,
+        callback = changed_handler,
     })
 end
 
