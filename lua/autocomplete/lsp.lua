@@ -4,7 +4,7 @@ local methods = vim.lsp.protocol.Methods
 local M = {}
 
 local state = {
-    skip_next = false
+    skip_next = false,
 }
 
 local function complete_done(client, bufnr)
@@ -17,7 +17,11 @@ local function complete_done(client, bufnr)
         util.debounce('textEdits', M.config.debounce_delay, function()
             return util.request(client, methods.completionItem_resolve, item, function(_, result)
                 if not vim.tbl_isempty(result.additionalTextEdits or {}) then
-                    vim.lsp.util.apply_text_edits(result.additionalTextEdits, bufnr, client.offset_encoding)
+                    vim.lsp.util.apply_text_edits(
+                        result.additionalTextEdits,
+                        bufnr,
+                        client.offset_encoding
+                    )
                 end
             end, bufnr)
         end)
@@ -29,7 +33,8 @@ local function complete_done(client, bufnr)
 end
 
 local function complete_changed(client, bufnr)
-    local item = vim.tbl_get(vim.v.event, 'completed_item', 'user_data', 'nvim', 'lsp', 'completion_item')
+    local item =
+        vim.tbl_get(vim.v.event, 'completed_item', 'user_data', 'nvim', 'lsp', 'completion_item')
     if not item then
         return
     end
@@ -83,36 +88,54 @@ local function text_changed(client, bufnr)
 
     local char = line:sub(col, col)
     local cmp_start = vim.fn.match(line:sub(1, col), '\\k*$')
-    local prefix = M.config.server_side_filtering and "" or line:sub(cmp_start + 1, col)
+    local prefix = M.config.server_side_filtering and '' or line:sub(cmp_start + 1, col)
     local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
 
     -- Check if we are triggering completion automatically or on trigger character
-    if vim.tbl_contains(client.server_capabilities.completionProvider.triggerCharacters or {}, char) then
+    if
+        vim.tbl_contains(
+            client.server_capabilities.completionProvider.triggerCharacters or {},
+            char
+        )
+    then
         params.context = {
             triggerKind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter,
-            triggerCharacter = char
+            triggerCharacter = char,
         }
     else
         params.context = {
             triggerKind = vim.lsp.protocol.CompletionTriggerKind.Invoked,
-            triggerCharacter = ''
+            triggerCharacter = '',
         }
     end
 
     util.debounce('completion', M.config.debounce_delay, function()
-        return util.request(client, methods.textDocument_completion, params, function (err, result, ctx)
-            if err or not result or not vim.api.nvim_buf_is_valid(ctx.bufnr) or not vim.fn.mode() == 'i' then
-                return
-            end
-
-            vim.schedule(function()
-                local items = vim.lsp._completion._lsp_to_complete_items(result, prefix)
-                items = vim.tbl_filter(function (item) return item.kind ~= "Snippet" end, items)
-                if vim.fn.mode() == 'i' then
-                    vim.fn.complete(cmp_start + 1, items)
+        return util.request(
+            client,
+            methods.textDocument_completion,
+            params,
+            function(err, result, ctx)
+                if
+                    err
+                    or not result
+                    or not vim.api.nvim_buf_is_valid(ctx.bufnr)
+                    or not vim.fn.mode() == 'i'
+                then
+                    return
                 end
-            end)
-        end, bufnr)
+
+                vim.schedule(function()
+                    local items = vim.lsp._completion._lsp_to_complete_items(result, prefix)
+                    items = vim.tbl_filter(function(item)
+                        return item.kind ~= 'Snippet'
+                    end, items)
+                    if vim.fn.mode() == 'i' then
+                        vim.fn.complete(cmp_start + 1, items)
+                    end
+                end)
+            end,
+            bufnr
+        )
     end)
 end
 
@@ -131,10 +154,10 @@ function M.capabilities()
                         properties = {
                             'documentation',
                             'detail',
-                            'additionalTextEdits'
+                            'additionalTextEdits',
                         },
                     },
-                }
+                },
             },
         },
     }
@@ -144,22 +167,22 @@ function M.setup(config)
     M.config = vim.tbl_deep_extend('force', M.config, config or {})
     local group = vim.api.nvim_create_augroup('LspCompletion', {})
 
-    vim.api.nvim_create_autocmd({'TextChangedI', 'TextChangedP'}, {
+    vim.api.nvim_create_autocmd({ 'TextChangedI', 'TextChangedP' }, {
         desc = 'Auto show LSP completion',
         group = group,
-        callback = util.with_client(text_changed, methods.textDocument_completion)
+        callback = util.with_client(text_changed, methods.textDocument_completion),
     })
 
     vim.api.nvim_create_autocmd('CompleteDone', {
         desc = 'Auto apply LSP completion edits after selection',
         group = group,
-        callback = util.with_client(complete_done, methods.textDocument_completion)
+        callback = util.with_client(complete_done, methods.textDocument_completion),
     })
 
     vim.api.nvim_create_autocmd('CompleteChanged', {
         desc = 'Auto update LSP completion info',
         group = group,
-        callback = util.with_client(complete_changed, methods.textDocument_completion)
+        callback = util.with_client(complete_changed, methods.textDocument_completion),
     })
 end
 

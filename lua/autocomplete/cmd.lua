@@ -13,12 +13,12 @@ local state = {
         skip_next = false,
         noselect = false,
         menuone = false,
-        data = {}
+        data = {},
     },
     window = {
         id = nil,
-        bufnr = nil
-    }
+        bufnr = nil,
+    },
 }
 
 local function open_win(height)
@@ -97,7 +97,9 @@ local function update_cmdline(accept, reset)
 
     local commands = vim.split(vim.fn.getcmdline(), ' ')
     table.remove(commands, #commands)
-    local new_cmdline = table.concat(commands, ' ') .. ' ' .. state.completion.data[state.completion.current].completion
+    local new_cmdline = table.concat(commands, ' ')
+        .. ' '
+        .. state.completion.data[state.completion.current].completion
     new_cmdline = vim.trim(new_cmdline)
     if accept and not M.config.close_on_done then
         new_cmdline = new_cmdline .. (vim.endswith(new_cmdline, '/') and '' or ' ')
@@ -171,7 +173,14 @@ local function cmdline_changed()
                 break
             end
 
-            vim.api.nvim_buf_set_text(state.window.bufnr, line, col * col_width, line, end_col, { shortened })
+            vim.api.nvim_buf_set_text(
+                state.window.bufnr,
+                line,
+                col * col_width,
+                line,
+                end_col,
+                { shortened }
+            )
 
             local data = {
                 start = { line, col * col_width },
@@ -195,7 +204,10 @@ local function cmdline_changed()
         end
     end
 
-    vim.api.nvim_win_set_height(state.window.id, math.min(math.floor(#completions / (math.floor(vim.o.columns / col_width))), window_height))
+    vim.api.nvim_win_set_height(
+        state.window.id,
+        math.min(math.floor(#completions / (math.floor(vim.o.columns / col_width))), window_height)
+    )
     highlight_selection()
     vim.cmd('redraw')
 end
@@ -233,7 +245,7 @@ M.config = {
     window = {
         border = nil,
         columns = 5,
-        rows = 0.3
+        rows = 0.3,
     },
     mappings = {
         accept = '<C-y>',

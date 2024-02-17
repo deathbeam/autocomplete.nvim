@@ -30,11 +30,17 @@ local function signature_handler(client, result, ctx)
         close_events = { 'CursorMoved', 'BufLeave', 'BufWinLeave' },
         border = M.config.border,
         max_width = M.config.max_width,
-        anchor_bias = "above"
+        anchor_bias = 'above',
     })
 
     if hl then
-        vim.api.nvim_buf_add_highlight(fbuf, state.ns, 'PmenuSel', vim.startswith(lines[1], '```') and 1 or 0, unpack(hl))
+        vim.api.nvim_buf_add_highlight(
+            fbuf,
+            state.ns,
+            'PmenuSel',
+            vim.startswith(lines[1], '```') and 1 or 0,
+            unpack(hl)
+        )
     end
 
     state.signature_window = fwin
@@ -51,21 +57,32 @@ local function text_changed(client, bufnr)
 
     -- Try to find signature help trigger character in current line
     for _, c in ipairs(client.server_capabilities.signatureHelpProvider.triggerCharacters or {}) do
-        if string.find(before_line, "[" .. c .. "]") then
+        if string.find(before_line, '[' .. c .. ']') then
             local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
             params.context = {
                 triggerKind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter,
-                triggerCharacter = c
+                triggerCharacter = c,
             }
 
             util.debounce('signature', M.config.debounce_delay, function()
-                return util.request(client, methods.textDocument_signatureHelp, params, function (err, result, ctx)
-                    if err or not result or not vim.api.nvim_buf_is_valid(ctx.bufnr) or not vim.fn.mode() == 'i' then
-                        return
-                    end
+                return util.request(
+                    client,
+                    methods.textDocument_signatureHelp,
+                    params,
+                    function(err, result, ctx)
+                        if
+                            err
+                            or not result
+                            or not vim.api.nvim_buf_is_valid(ctx.bufnr)
+                            or not vim.fn.mode() == 'i'
+                        then
+                            return
+                        end
 
-                    signature_handler(client,  result, ctx)
-                end, bufnr)
+                        signature_handler(client, result, ctx)
+                    end,
+                    bufnr
+                )
             end)
 
             return
@@ -78,7 +95,7 @@ end
 M.config = {
     border = nil, -- Signature border style
     max_width = nil, -- Max width of signature window
-    debounce_delay = 100
+    debounce_delay = 100,
 }
 
 function M.setup(config)
@@ -89,7 +106,7 @@ function M.setup(config)
     vim.api.nvim_create_autocmd('CursorMovedI', {
         desc = 'Auto show LSP signature help',
         group = group,
-        callback = util.with_client(text_changed, methods.textDocument_signatureHelp)
+        callback = util.with_client(text_changed, methods.textDocument_signatureHelp),
     })
 end
 

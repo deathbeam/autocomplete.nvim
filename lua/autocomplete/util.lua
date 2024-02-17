@@ -16,14 +16,18 @@ function M.debounce(name, ms, func)
     else
         entry = {
             timer = vim.uv.new_timer(),
-            cancel = nil
+            cancel = nil,
         }
         debounce_cache[name] = entry
     end
 
-    entry.timer:start(ms, 0, vim.schedule_wrap(function()
-        entry.cancel = func()
-    end))
+    entry.timer:start(
+        ms,
+        0,
+        vim.schedule_wrap(function()
+            entry.cancel = func()
+        end)
+    )
 end
 
 function M.debounce_stop(name)
