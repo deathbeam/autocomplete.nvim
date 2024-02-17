@@ -70,16 +70,6 @@ local function complete_changed(client, bufnr)
     end)
 end
 
-local function completion_handler(line, col, result)
-    local cmp_start = vim.fn.match(line:sub(1, col), '\\k*$')
-    local prefix = line:sub(cmp_start + 1, col)
-    local items = vim.lsp._completion._lsp_to_complete_items(result, prefix)
-    items = vim.tbl_filter(function (item) return item.kind ~= "Snippet" end, items)
-    if vim.fn.mode() == 'i' then
-        vim.fn.complete(cmp_start + 1, items)
-    end
-end
-
 local function text_changed(client, bufnr)
     -- We do not want to trigger completion again if we just accepted a completion
     if state.skip_next then
@@ -94,6 +84,8 @@ local function text_changed(client, bufnr)
     end
 
     local char = line:sub(col, col)
+    local cmp_start = vim.fn.match(line:sub(1, col), '\\k*$')
+    local prefix = line:sub(cmp_start + 1, col)
     local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
 
     -- Check if we are triggering completion automatically or on trigger character
@@ -115,7 +107,13 @@ local function text_changed(client, bufnr)
                 return
             end
 
-            vim.schedule(function() completion_handler(line, col, result) end)
+            vim.schedule(function()
+                local items = vim.lsp._completion._lsp_to_complete_items(result, prefix)
+                items = vim.tbl_filter(function (item) return item.kind ~= "Snippet" end, items)
+                if vim.fn.mode() == 'i' then
+                    vim.fn.complete(cmp_start + 1, items)
+                end
+            end)
         end, bufnr)
     end)
 end
