@@ -83,7 +83,7 @@ local function text_changed(client, bufnr)
 
     local char = line:sub(col, col)
     local cmp_start = vim.fn.match(line:sub(1, col), '\\k*$')
-    local prefix = line:sub(cmp_start + 1, col)
+    local prefix = M.config.server_side_filtering and "" or line:sub(cmp_start + 1, col)
     local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
 
     -- Check if we are triggering completion automatically or on trigger character
@@ -117,7 +117,8 @@ local function text_changed(client, bufnr)
 end
 
 M.config = {
-    debounce_delay = 100
+    server_side_filtering = true, -- Use LSP filtering instead of vim's
+    debounce_delay = 100,
 }
 
 function M.capabilities()

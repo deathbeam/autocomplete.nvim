@@ -39,6 +39,7 @@ require("autocomplete.signature").setup {
 
 -- LSP autocompletion
 require("autocomplete.lsp").setup {
+    server_side_filtering = true, -- Use LSP filtering instead of vim's
     debounce_delay = 100
 }
 
