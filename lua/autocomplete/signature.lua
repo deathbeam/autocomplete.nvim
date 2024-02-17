@@ -39,7 +39,6 @@ local function signature_handler(client, line, col, result, ctx)
 end
 
 local function text_changed(client, bufnr)
-    vim.print(client.server_capabilities)
     local line = vim.api.nvim_get_current_line()
     local col = vim.api.nvim_win_get_cursor(0)[2]
     if col == 0 or #line == 0 then
