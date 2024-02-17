@@ -34,8 +34,6 @@ local function complete_changed(client, bufnr)
         return
     end
 
-    -- FIXME: Sometimes I do not receive updated complete_info (for example requests.get, 
-    -- I get index 19 instead of 0 as its only match, when I press backspace it updates to 0)
     local data = vim.fn.complete_info()
     local selected = data.selected
 
@@ -145,7 +143,7 @@ function M.setup(config)
     M.config = vim.tbl_deep_extend('force', M.config, config or {})
     local group = vim.api.nvim_create_augroup('LspCompletion', {})
 
-    vim.api.nvim_create_autocmd('TextChangedI', {
+    vim.api.nvim_create_autocmd({'TextChangedI', 'TextChangedP'}, {
         desc = 'Auto show LSP completion',
         group = group,
         callback = util.with_client(text_changed, methods.textDocument_completion)
