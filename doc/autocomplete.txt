@@ -43,15 +43,15 @@ For installation instructions/repository go here
 
 USAGE                                   *autocomplete-autocomplete.nvim-usage*
 
-Just require either lsp or cmd module or both and call setup on them (and
-enable `popup` completeopt). **NOTE**: You dont need to provide the
-configuration, below is just default config, you can just call setup with no
-arguments for default.
+Just require either lsp or cmd module or both and call setup on them. **NOTE**:
+You dont need to provide the configuration, below is just default config, you
+can just call setup with no arguments for default.
 
 >lua
     -- LSP signature help
     require("autocomplete.signature").setup {
         border = nil, -- Signature help border style
+        max_width = nil, -- Max width of signature window
         debounce_delay = 100
     }
     
@@ -84,6 +84,16 @@ preview:
 
 >lua
     vim.o.completeopt = 'menuone,noinsert,popup'
+<
+
+If you want to disable to accept completion (as with autocomplete its
+disgustingly annoying) you can do this:
+
+>lua
+    -- Disable <CR> to accept (this really should be a mapping, so stupid)
+    vim.keymap.set("i", "<CR>", function()
+        return vim.fn.pumvisible() ~= 0 and "<Esc>o" or "<CR>"
+    end, { expr = true, replace_keycodes = true })
 <
 
 And you also ideally want to set the capabilities so Neovim will fetch
