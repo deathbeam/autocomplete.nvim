@@ -29,6 +29,7 @@ local function signature_handler(client, result, ctx)
         focusable = false,
         close_events = { 'CursorMoved', 'BufLeave', 'BufWinLeave' },
         border = M.config.border,
+        anchor_bias = "above"
     })
 
     if hl then
