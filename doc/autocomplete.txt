@@ -49,15 +49,18 @@ configuration, below is just default config, you can just call setup with no
 arguments for default.
 
 >lua
-    require("autocomplete.lsp").setup {
-        debounce_delay = 100
-    }
-    
+    -- LSP signature help
     require("autocomplete.signature").setup {
         border = nil, -- Signature help border style
         debounce_delay = 100
     }
     
+    -- LSP autocompletion
+    require("autocomplete.lsp").setup {
+        debounce_delay = 100
+    }
+    
+    -- cmdline autocompletion
     require("autocomplete.cmd").setup {
         window = {
             border = nil,
