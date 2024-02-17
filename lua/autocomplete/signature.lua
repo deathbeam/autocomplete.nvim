@@ -29,6 +29,7 @@ local function signature_handler(client, result, ctx)
         focusable = false,
         close_events = { 'CursorMoved', 'BufLeave', 'BufWinLeave' },
         border = M.config.border,
+        max_width = M.config.max_width,
         anchor_bias = "above"
     })
 
@@ -76,6 +77,7 @@ end
 
 M.config = {
     border = nil, -- Signature border style
+    max_width = nil, -- Max width of signature window
     debounce_delay = 100
 }
 

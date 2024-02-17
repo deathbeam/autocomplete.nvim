@@ -25,7 +25,7 @@ For installation instructions/repository go [here](https://github.com/neovim/neo
 
 ## Usage
 
-Just require either lsp or cmd module or both and call setup on them (and enable `popup` completeopt).  
+Just require either lsp or cmd module or both and call setup on them.  
 **NOTE**: You dont need to provide the configuration, below is just default config, you can just
 call setup with no arguments for default.
 
@@ -33,6 +33,7 @@ call setup with no arguments for default.
 -- LSP signature help
 require("autocomplete.signature").setup {
     border = nil, -- Signature help border style
+    max_width = nil, -- Max width of signature window
     debounce_delay = 100
 }
 
@@ -64,6 +65,15 @@ You also probably want to enable `popup` in completeopt to show documentation pr
 
 ```lua
 vim.o.completeopt = 'menuone,noinsert,popup'
+```
+
+If you want to disable <CR> to accept completion (as with autocomplete its disgustingly annoying) you can do this:
+
+```lua
+-- Disable <CR> to accept (this really should be a mapping, so stupid)
+vim.keymap.set("i", "<CR>", function()
+    return vim.fn.pumvisible() ~= 0 and "<Esc>o" or "<CR>"
+end, { expr = true, replace_keycodes = true })
 ```
 
 And you also ideally want to set the capabilities so Neovim will fetch documentation and additional text edits
