@@ -86,7 +86,7 @@ preview:
     vim.o.completeopt = 'menuone,noinsert,popup'
 <
 
-If you want to disable to accept completion (as with autocomplete its
+If you want to disable `<CR>` to accept completion (as with autocomplete its
 disgustingly annoying) you can do this:
 
 >lua
