@@ -75,11 +75,9 @@ local function completion_handler(line, col, result)
     local prefix = line:sub(cmp_start + 1, col)
     local items = vim.lsp._completion._lsp_to_complete_items(result, prefix)
     items = vim.tbl_filter(function (item) return item.kind ~= "Snippet" end, items)
-    vim.schedule(function()
-        if vim.fn.mode() == 'i' then
-            vim.fn.complete(cmp_start + 1, items)
-        end
-    end)
+    if vim.fn.mode() == 'i' then
+        vim.fn.complete(cmp_start + 1, items)
+    end
 end
 
 local function text_changed(client, bufnr)
@@ -97,7 +95,6 @@ local function text_changed(client, bufnr)
 
     local char = line:sub(col, col)
     local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
-
 
     -- Check if we are triggering completion automatically or on trigger character
     if vim.tbl_contains(client.server_capabilities.completionProvider.triggerCharacters or {}, char) then
@@ -118,7 +115,7 @@ local function text_changed(client, bufnr)
                 return
             end
 
-            completion_handler(line, col, result)
+            vim.schedule(function() completion_handler(line, col, result) end)
         end, bufnr)
     end)
 end
