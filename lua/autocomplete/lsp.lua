@@ -32,7 +32,7 @@ end
 local function with_client(callback)
     return function(args)
         local bufnr = args.buf
-        local clients = vim.lsp.get_clients({ bufnr, method = methods.textDocument_completion })
+        local clients = vim.lsp.get_clients({ bufnr = bufnr, method = methods.textDocument_completion })
         if vim.tbl_isempty(clients) then
             return
         end
