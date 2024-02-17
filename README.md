@@ -30,15 +30,18 @@ Just require either lsp or cmd module or both and call setup on them (and enable
 call setup with no arguments for default.
 
 ```lua
-require("autocomplete.lsp").setup {
-    debounce_delay = 100
-}
-
+-- LSP signature help
 require("autocomplete.signature").setup {
     border = nil, -- Signature help border style
     debounce_delay = 100
 }
 
+-- LSP autocompletion
+require("autocomplete.lsp").setup {
+    debounce_delay = 100
+}
+
+-- cmdline autocompletion
 require("autocomplete.cmd").setup {
     window = {
         border = nil,
