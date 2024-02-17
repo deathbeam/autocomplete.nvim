@@ -29,7 +29,7 @@ local function open_win(height)
     if not state.window.id or not vim.api.nvim_win_is_valid(state.window.id) then
         state.window.id = vim.api.nvim_open_win(state.window.bufnr, false, {
             relative = 'editor',
-            border = M.config.window.border,
+            border = M.config.border,
             style = 'minimal',
             width = vim.o.columns,
             height = height,
@@ -115,12 +115,12 @@ local function cmdline_changed()
         return
     end
 
-    local window_height = M.config.window.rows
+    local window_height = M.config.rows
     if window_height < 1 then
         window_height = math.floor(vim.o.lines * window_height)
     end
 
-    local col_width = math.floor(vim.o.columns / M.config.window.columns)
+    local col_width = math.floor(vim.o.columns / M.config.columns)
 
     -- Recreate window if we closed it before
     open_win(window_height)
@@ -242,11 +242,6 @@ local function leave_handler()
 end
 
 M.config = {
-    window = {
-        border = nil,
-        columns = 5,
-        rows = 0.3,
-    },
     mappings = {
         accept = '<C-y>',
         reject = '<C-e>',
@@ -254,8 +249,11 @@ M.config = {
         next = '<C-n>',
         previous = '<C-p>',
     },
-    debounce_delay = 100,
+    border = nil, -- Cmdline completion border style
+    columns = 5, -- Number of columns per row
+    rows = 0.3, -- Number of rows, if < 1 then its fraction of total vim lines, if > 1 then its absolute number
     close_on_done = true, -- Close completion window when done (accept/reject)
+    debounce_delay = 100,
 }
 
 function M.setup(config)

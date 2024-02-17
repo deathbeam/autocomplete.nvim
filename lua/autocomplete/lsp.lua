@@ -144,24 +144,22 @@ M.config = {
     debounce_delay = 100,
 }
 
-function M.capabilities()
-    return {
-        textDocument = {
-            completion = {
-                completionItem = {
-                    -- Fetch additional info for completion items
-                    resolveSupport = {
-                        properties = {
-                            'documentation',
-                            'detail',
-                            'additionalTextEdits',
-                        },
+M.capabilities = {
+    textDocument = {
+        completion = {
+            completionItem = {
+                -- Fetch additional info for completion items
+                resolveSupport = {
+                    properties = {
+                        'documentation',
+                        'detail',
+                        'additionalTextEdits',
                     },
                 },
             },
         },
-    }
-end
+    },
+}
 
 function M.setup(config)
     M.config = vim.tbl_deep_extend('force', M.config, config or {})

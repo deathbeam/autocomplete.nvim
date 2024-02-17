@@ -45,11 +45,6 @@ require("autocomplete.lsp").setup {
 
 -- cmdline autocompletion
 require("autocomplete.cmd").setup {
-    window = {
-        border = nil,
-        columns = 5,
-        rows = 0.3
-    },
     mappings = {
         accept = '<C-y>',
         reject = '<C-e>',
@@ -57,8 +52,11 @@ require("autocomplete.cmd").setup {
         next = '<C-n>',
         previous = '<C-p>',
     },
-    debounce_delay = 100,
+    border = nil, -- Cmdline completion border style
+    columns = 5, -- Number of columns per row
+    rows = 0.3, -- Number of rows, if < 1 then its fraction of total vim lines, if > 1 then its absolute number
     close_on_done = true, -- Close completion window when done (accept/reject)
+    debounce_delay = 100,
 }
 ```
 
@@ -84,7 +82,7 @@ when resolving completion items:
 -- Here we grab default Neovim capabilities and extend them with ones we want on top
 local capabilities = vim.tbl_deep_extend('force', 
     vim.lsp.protocol.make_client_capabilities(), 
-    require('completion.lsp').capabilities())
+    require('completion.lsp').capabilities)
 
 -- Now set capabilities on your LSP servers
 require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
