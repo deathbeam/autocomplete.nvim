@@ -23,6 +23,11 @@ for completion menu and closing windows properly from cmdline callbacks.
 
 For installation instructions/repository go [here](https://github.com/neovim/neovim)
 
+## Installation
+
+Just use [lazy.nvim](https://github.com/folke/lazy.nvim) or `:h packages` with git submodules or something else I don't care.
+Read the documentation of whatever you want to use.
+
 ## Usage
 
 Just require either lsp or cmd module or both and call setup on them.  
