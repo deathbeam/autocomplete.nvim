@@ -95,13 +95,6 @@ require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
 }
 ```
 
-## Features
-
-- LSP autocomplete
-- LSP signature help
-- LSP documentation
-- cmdline autocompletion
-
 ## Similar projects
 
 I used some of this projects as reference and they are also good alternatives:
