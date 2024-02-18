@@ -45,6 +45,7 @@ require("autocomplete.signature").setup {
 -- LSP autocompletion
 require("autocomplete.lsp").setup {
     server_side_filtering = true, -- Use LSP filtering instead of vim's
+    entry_mapper = nil, -- Custom completion entry mapper
     debounce_delay = 100
 }
 

@@ -129,6 +129,10 @@ local function text_changed(client, bufnr)
                     items = vim.tbl_filter(function(item)
                         return item.kind ~= 'Snippet'
                     end, items)
+                    if M.config.entry_mapper then
+                        items = vim.tbl_map(M.config.entry_mapper, items)
+                    end
+
                     if vim.fn.mode() == 'i' then
                         vim.fn.complete(cmp_start + 1, items)
                     end
@@ -141,6 +145,7 @@ end
 
 M.config = {
     server_side_filtering = true, -- Use LSP filtering instead of vim's
+    entry_mapper = nil, -- Custom completion entry mapper
     debounce_delay = 100,
 }
 
