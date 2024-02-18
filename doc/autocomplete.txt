@@ -7,7 +7,6 @@ Table of Contents                             *autocomplete-table-of-contents*
   - Requirements                 |autocomplete-autocomplete.nvim-requirements|
   - Installation                 |autocomplete-autocomplete.nvim-installation|
   - Usage                               |autocomplete-autocomplete.nvim-usage|
-  - Features                         |autocomplete-autocomplete.nvim-features|
   - Similar projects         |autocomplete-autocomplete.nvim-similar-projects|
 
 ==============================================================================
@@ -114,14 +113,6 @@ documentation and additional text edits when resolving completion items:
         capabilities = capabilities
     }
 <
-
-
-FEATURES                             *autocomplete-autocomplete.nvim-features*
-
-- LSP autocomplete
-- LSP signature help
-- LSP documentation
-- cmdline autocompletion
 
 
 SIMILAR PROJECTS             *autocomplete-autocomplete.nvim-similar-projects*
