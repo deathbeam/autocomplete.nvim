@@ -5,6 +5,7 @@ Table of Contents                             *autocomplete-table-of-contents*
 
 1. autocomplete.nvim                          |autocomplete-autocomplete.nvim|
   - Requirements                 |autocomplete-autocomplete.nvim-requirements|
+  - Installation                 |autocomplete-autocomplete.nvim-installation|
   - Usage                               |autocomplete-autocomplete.nvim-usage|
   - Features                         |autocomplete-autocomplete.nvim-features|
   - Similar projects         |autocomplete-autocomplete.nvim-similar-projects|
@@ -36,6 +37,13 @@ callbacks.
 
 For installation instructions/repository go here
 <https://github.com/neovim/neovim>
+
+
+INSTALLATION                     *autocomplete-autocomplete.nvim-installation*
+
+Just use lazy.nvim <https://github.com/folke/lazy.nvim> or |packages| with git
+submodules or something else I don’t care. Read the documentation of whatever
+you want to use.
 
 
 USAGE                                   *autocomplete-autocomplete.nvim-usage*
