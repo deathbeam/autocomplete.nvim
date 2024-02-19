@@ -7,14 +7,7 @@ implement it by myself. Then I just extracted the code to separate plugin in cas
 Just a warning, there might be some bugs and as this requires Neovim 0.10+ (e.g nightly), that one can also have
 bugs by itself.
 
-LSP documentation:
-![lsp-documentation](https://github.com/deathbeam/autocomplete.nvim/assets/5115805/92a4a56e-4156-439e-bc24-8ebad0bc7e2b)
-
-LSP signature help:
-![lsp-signature-help](https://github.com/deathbeam/autocomplete.nvim/assets/5115805/40a5fb51-8506-4f22-8da2-210f44bee2d5)
-
-cmdline completion:
-![cmd-completion](https://github.com/deathbeam/autocomplete.nvim/assets/5115805/26032cf7-fe39-4a78-9745-ab1599fe8d14)
+https://github.com/deathbeam/autocomplete.nvim/assets/5115805/32e59389-baa8-417a-b5cb-26dddeb8786a
 
 ## Requirements
 
