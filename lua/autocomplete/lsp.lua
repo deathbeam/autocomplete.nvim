@@ -16,7 +16,7 @@ local function complete_done(client, bufnr)
     if vim.tbl_isempty(item.additionalTextEdits or {}) then
         util.debounce('textEdits', M.config.debounce_delay, function()
             return util.request(client, methods.completionItem_resolve, item, function(_, result)
-                if not vim.tbl_isempty(result.additionalTextEdits or {}) then
+                if result and not vim.tbl_isempty(result.additionalTextEdits or {}) then
                     vim.lsp.util.apply_text_edits(
                         result.additionalTextEdits,
                         bufnr,
@@ -42,21 +42,20 @@ local function complete_changed(client, bufnr)
     local data = vim.fn.complete_info()
     local selected = data.selected
 
+    -- FIXME: Preview popup do not auto resizes to fit new content so have to reset it like this
+    if data.preview_winid and vim.api.nvim_win_is_valid(data.preview_winid) then
+        vim.api.nvim_win_close(data.preview_winid, true)
+    end
+
     util.debounce('info', M.config.debounce_delay, function()
         return util.request(client, methods.completionItem_resolve, item, function(_, result)
-            local info = vim.fn.complete_info()
-
-            -- FIXME: Preview popup do not auto resizes to fit new content so have to reset it like this
-            if info.preview_winid and vim.api.nvim_win_is_valid(info.preview_winid) then
-                vim.api.nvim_win_close(info.preview_winid, true)
+            if not result then
+                return
             end
 
-            if
-                not result
-                or not info.items
-                or not info.selected
-                or not info.selected == selected
-            then
+            local info = vim.fn.complete_info()
+
+            if not info.items or not info.selected or not info.selected == selected then
                 return
             end
 
