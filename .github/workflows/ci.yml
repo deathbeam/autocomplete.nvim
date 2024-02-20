@@ -31,6 +31,7 @@ jobs:
         with:
           vimdoc: autocomplete
           treesitter: true
+          version: "NVIM v0.10.0"
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: 'chore(doc): auto generate docs'
