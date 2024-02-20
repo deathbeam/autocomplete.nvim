@@ -15,14 +15,16 @@ local function complete_done(client, bufnr)
 
     if vim.tbl_isempty(item.additionalTextEdits or {}) then
         util.debounce('textEdits', M.config.debounce_delay, function()
-            return util.request(client, methods.completionItem_resolve, item, function(_, result)
-                if result and not vim.tbl_isempty(result.additionalTextEdits or {}) then
-                    vim.lsp.util.apply_text_edits(
-                        result.additionalTextEdits,
-                        bufnr,
-                        client.offset_encoding
-                    )
+            return util.request(client, methods.completionItem_resolve, item, function(result)
+                if vim.tbl_isempty(result.additionalTextEdits or {}) then
+                    return
                 end
+
+                vim.lsp.util.apply_text_edits(
+                    result.additionalTextEdits,
+                    bufnr,
+                    client.offset_encoding
+                )
             end, bufnr)
         end)
     else
@@ -43,38 +45,27 @@ local function complete_changed(client, bufnr)
     local selected = data.selected
 
     util.debounce('info', M.config.debounce_delay, function()
-        return util.request(client, methods.completionItem_resolve, item, function(err, result, ctx)
-            if
-                err
-                or not result
-                or not vim.api.nvim_buf_is_valid(ctx.bufnr)
-                or not vim.fn.mode() == 'i'
-            then
+        return util.request(client, methods.completionItem_resolve, item, function(result)
+            local info = vim.fn.complete_info()
+
+            -- FIXME: Preview popup do not auto resizes to fit new content so have to reset it like this
+            if info.preview_winid and vim.api.nvim_win_is_valid(info.preview_winid) then
+                vim.api.nvim_win_close(info.preview_winid, true)
+            end
+
+            if not info.items or not info.selected or not info.selected == selected then
                 return
             end
 
-            vim.schedule(function()
-                local info = vim.fn.complete_info()
-
-                -- FIXME: Preview popup do not auto resizes to fit new content so have to reset it like this
-                if info.preview_winid and vim.api.nvim_win_is_valid(info.preview_winid) then
-                    vim.api.nvim_win_close(info.preview_winid, true)
+            local value = vim.tbl_get(result, 'documentation', 'value')
+            if value then
+                local wininfo = vim.api.nvim_complete_set(selected, { info = value })
+                if wininfo.winid and wininfo.bufnr then
+                    vim.wo[wininfo.winid].conceallevel = 2
+                    vim.wo[wininfo.winid].concealcursor = 'niv'
+                    vim.bo[wininfo.bufnr].syntax = 'markdown'
                 end
-
-                if not info.items or not info.selected or not info.selected == selected then
-                    return
-                end
-
-                local value = vim.tbl_get(result, 'documentation', 'value')
-                if value then
-                    local wininfo = vim.api.nvim_complete_set(selected, { info = value })
-                    if wininfo.winid and wininfo.bufnr then
-                        vim.wo[wininfo.winid].conceallevel = 2
-                        vim.wo[wininfo.winid].concealcursor = 'niv'
-                        vim.bo[wininfo.bufnr].syntax = 'markdown'
-                    end
-                end
-            end)
+            end
         end, bufnr)
     end)
 end
@@ -93,7 +84,7 @@ local function text_changed(client, bufnr)
 
     local char = line:sub(col, col)
     local prefix, cmp_start = unpack(vim.fn.matchstrpos(line:sub(1, col - 1), '\\k*$'))
-    prefix = M.config.server_side_filtering and '' or prefix:lower()
+    prefix = M.config.server_side_filtering and '' or prefix
 
     local context = {
         triggerKind = vim.lsp.protocol.CompletionTriggerKind.Invoked,
@@ -126,36 +117,19 @@ local function text_changed(client, bufnr)
             client.offset_encoding
         )
         params.context = context
-        return util.request(
-            client,
-            methods.textDocument_completion,
-            params,
-            function(err, result, ctx)
-                if
-                    err
-                    or not result
-                    or not vim.api.nvim_buf_is_valid(ctx.bufnr)
-                    or not vim.fn.mode() == 'i'
-                then
-                    return
-                end
+        return util.request(client, methods.textDocument_completion, params, function(result)
+            local items = vim.lsp._completion._lsp_to_complete_items(result, prefix)
+            items = vim.tbl_filter(function(item)
+                return item.kind ~= 'Snippet'
+            end, items)
+            if M.config.entry_mapper then
+                items = vim.tbl_map(M.config.entry_mapper, items)
+            end
 
-                vim.schedule(function()
-                    local items = vim.lsp._completion._lsp_to_complete_items(result, prefix)
-                    items = vim.tbl_filter(function(item)
-                        return item.kind ~= 'Snippet'
-                    end, items)
-                    if M.config.entry_mapper then
-                        items = vim.tbl_map(M.config.entry_mapper, items)
-                    end
-
-                    if vim.fn.mode() == 'i' then
-                        vim.fn.complete(cmp_start + 1, items)
-                    end
-                end)
-            end,
-            bufnr
-        )
+            if vim.fn.mode() == 'i' then
+                vim.fn.complete(cmp_start + 1, items)
+            end
+        end, bufnr)
     end)
 end
 
