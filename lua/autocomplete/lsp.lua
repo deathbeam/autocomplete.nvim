@@ -160,7 +160,7 @@ function M.setup(config)
     M.config = vim.tbl_deep_extend('force', M.config, config or {})
     local group = vim.api.nvim_create_augroup('LspCompletion', {})
 
-    vim.api.nvim_create_autocmd({ 'TextChangedI', 'TextChangedP' }, {
+    vim.api.nvim_create_autocmd('TextChangedI', {
         desc = 'Auto show LSP completion',
         group = group,
         callback = util.with_client(text_changed, methods.textDocument_completion),
