@@ -5,6 +5,11 @@ local M = {}
 
 local state = {
     skip_next = false,
+    entries = {
+        completion = nil,
+        info = nil,
+        edit = nil,
+    },
 }
 
 local function complete_done(client, bufnr)
@@ -14,7 +19,7 @@ local function complete_done(client, bufnr)
     end
 
     if vim.tbl_isempty(item.additionalTextEdits or {}) then
-        util.debounce('textEdits', M.config.debounce_delay, function()
+        util.debounce(state.entries.edit, M.config.debounce_delay, function()
             return util.request(client, methods.completionItem_resolve, item, function(result)
                 if vim.tbl_isempty(result.additionalTextEdits or {}) then
                     return
@@ -44,7 +49,7 @@ local function complete_changed(client, bufnr)
     local data = vim.fn.complete_info()
     local selected = data.selected
 
-    util.debounce('info', M.config.debounce_delay, function()
+    util.debounce(state.entries.info, M.config.debounce_delay, function()
         return util.request(client, methods.completionItem_resolve, item, function(result)
             local info = vim.fn.complete_info()
 
@@ -111,7 +116,7 @@ local function text_changed(client, bufnr)
         end
     end
 
-    util.debounce('completion', M.config.debounce_delay, function()
+    util.debounce(state.entries.completion, M.config.debounce_delay, function()
         local params = vim.lsp.util.make_position_params(
             vim.api.nvim_get_current_win(),
             client.offset_encoding
@@ -158,6 +163,10 @@ M.capabilities = {
 
 function M.setup(config)
     M.config = vim.tbl_deep_extend('force', M.config, config or {})
+    state.entries.completion = util.entry()
+    state.entries.info = util.entry()
+    state.entries.edit = util.entry()
+
     local group = vim.api.nvim_create_augroup('LspCompletion', {})
 
     vim.api.nvim_create_autocmd('TextChangedI', {

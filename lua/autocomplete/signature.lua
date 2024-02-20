@@ -4,6 +4,7 @@ local methods = vim.lsp.protocol.Methods
 local M = {}
 
 local state = {
+    entry = nil,
     ns = nil,
     signature_window = nil,
 }
@@ -64,7 +65,7 @@ local function text_changed(client, bufnr)
                 triggerCharacter = c,
             }
 
-            util.debounce('signature', M.config.debounce_delay, function()
+            util.debounce(state.entry, M.config.debounce_delay, function()
                 return util.request(
                     client,
                     methods.textDocument_signatureHelp,
@@ -92,6 +93,7 @@ M.config = {
 function M.setup(config)
     M.config = vim.tbl_deep_extend('force', M.config, config or {})
     state.ns = vim.api.nvim_create_namespace('LspSignatureHelp')
+    state.entry = util.entry()
     local group = vim.api.nvim_create_augroup('LspSignatureHelp', {})
 
     vim.api.nvim_create_autocmd('CursorMovedI', {

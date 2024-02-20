@@ -3,6 +3,7 @@ local util = require('autocomplete.util')
 local M = {}
 
 local state = {
+    entry = nil,
     ns = {
         selection = nil,
         directory = nil,
@@ -221,7 +222,7 @@ local function changed_handler()
         return
     end
 
-    util.debounce('cmdline', M.config.debounce_delay, cmdline_changed)
+    util.debounce(state.entry, M.config.debounce_delay, cmdline_changed)
 end
 
 local function enter_handler()
@@ -235,7 +236,7 @@ local function enter_handler()
 end
 
 local function leave_handler()
-    util.debounce_stop('cmdline')
+    util.stop(state.entry)
     state.completion.data = {}
     state.completion.last = nil
 
@@ -266,6 +267,7 @@ function M.setup(config)
     -- Wild menu needs to be always disabled otherwise its in background for no reason
     vim.o.wildmenu = false
 
+    state.entry = util.entry()
     state.ns.selection = vim.api.nvim_create_namespace('CmdlineCompletionSelection')
     state.ns.directory = vim.api.nvim_create_namespace('CmdlineCompletionDirectory')
 
