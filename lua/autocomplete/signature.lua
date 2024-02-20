@@ -15,9 +15,9 @@ local function close_signature_window()
     end
 end
 
-local function signature_handler(client, result, ctx)
+local function signature_handler(client, result, bufnr)
     local triggers = client.server_capabilities.signatureHelpProvider.triggerCharacters
-    local ft = vim.bo[ctx.bufnr].filetype
+    local ft = vim.bo[bufnr].filetype
     local lines, hl = vim.lsp.util.convert_signature_help_to_markdown_lines(result, ft, triggers)
     if not lines or vim.tbl_isempty(lines) then
         close_signature_window()
@@ -69,17 +69,8 @@ local function text_changed(client, bufnr)
                     client,
                     methods.textDocument_signatureHelp,
                     params,
-                    function(err, result, ctx)
-                        if
-                            err
-                            or not result
-                            or not vim.api.nvim_buf_is_valid(ctx.bufnr)
-                            or not vim.fn.mode() == 'i'
-                        then
-                            return
-                        end
-
-                        signature_handler(client, result, ctx)
+                    function(result)
+                        signature_handler(client, result, bufnr)
                     end,
                     bufnr
                 )
