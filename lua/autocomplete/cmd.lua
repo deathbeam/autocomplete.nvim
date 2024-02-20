@@ -145,6 +145,8 @@ local function cmdline_changed()
         return
     end
 
+    local completion_data = {}
+
     local i = 1
     for line = 0, window_height - 1 do
         for col = 0, math.floor(vim.o.columns / col_width) - 1 do
@@ -188,7 +190,7 @@ local function cmdline_changed()
                 completion = completion,
             }
 
-            state.completion.data[i] = data
+            completion_data[i] = data
             if is_directory then
                 vim.highlight.range(
                     state.window.bufnr,
@@ -203,6 +205,8 @@ local function cmdline_changed()
             i = i + 1
         end
     end
+
+    state.completion.data = completion_data
 
     vim.api.nvim_win_set_height(
         state.window.id,

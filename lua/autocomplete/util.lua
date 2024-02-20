@@ -34,7 +34,6 @@ function M.debounce_stop(name)
     local entry = debounce_cache[name]
     if entry then
         stop_entry(entry)
-        debounce_cache[name] = nil
     end
 end
 
