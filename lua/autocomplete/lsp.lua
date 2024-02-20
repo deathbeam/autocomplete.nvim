@@ -83,7 +83,7 @@ local function text_changed(client, bufnr)
     end
 
     local char = line:sub(col, col)
-    local prefix, cmp_start = unpack(vim.fn.matchstrpos(line:sub(1, col - 1), '\\k*$'))
+    local prefix, cmp_start = unpack(vim.fn.matchstrpos(line:sub(1, col), '\\k*$'))
     prefix = M.config.server_side_filtering and '' or prefix
 
     local context = {
