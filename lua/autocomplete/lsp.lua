@@ -42,32 +42,43 @@ local function complete_changed(client, bufnr)
     local data = vim.fn.complete_info()
     local selected = data.selected
 
-    -- FIXME: Preview popup do not auto resizes to fit new content so have to reset it like this
-    if data.preview_winid and vim.api.nvim_win_is_valid(data.preview_winid) then
-        vim.api.nvim_win_close(data.preview_winid, true)
-    end
-
     util.debounce('info', M.config.debounce_delay, function()
-        return util.request(client, methods.completionItem_resolve, item, function(_, result)
-            if not result then
+        return util.request(client, methods.completionItem_resolve, item, function(err, result, ctx)
+            if
+                err
+                or not result
+                or not vim.api.nvim_buf_is_valid(ctx.bufnr)
+                or not vim.fn.mode() == 'i'
+            then
                 return
             end
 
-            local info = vim.fn.complete_info()
+            vim.schedule(function()
+                local info = vim.fn.complete_info()
 
-            if not info.items or not info.selected or not info.selected == selected then
-                return
-            end
-
-            local value = vim.tbl_get(result, 'documentation', 'value')
-            if value then
-                local wininfo = vim.api.nvim_complete_set(selected, { info = value })
-                if wininfo.winid and wininfo.bufnr then
-                    vim.wo[wininfo.winid].conceallevel = 2
-                    vim.wo[wininfo.winid].concealcursor = 'niv'
-                    vim.bo[wininfo.bufnr].syntax = 'markdown'
+                -- FIXME: Preview popup do not auto resizes to fit new content so have to reset it like this
+                if info.preview_winid and vim.api.nvim_win_is_valid(info.preview_winid) then
+                    vim.api.nvim_win_close(info.preview_winid, true)
                 end
-            end
+
+                if
+                    not info.items
+                    or not info.selected
+                    or not info.selected == selected
+                then
+                    return
+                end
+
+                local value = vim.tbl_get(result, 'documentation', 'value')
+                if value then
+                    local wininfo = vim.api.nvim_complete_set(selected, { info = value })
+                    if wininfo.winid and wininfo.bufnr then
+                        vim.wo[wininfo.winid].conceallevel = 2
+                        vim.wo[wininfo.winid].concealcursor = 'niv'
+                        vim.bo[wininfo.bufnr].syntax = 'markdown'
+                    end
+                end
+            end)
         end, bufnr)
     end)
 end
