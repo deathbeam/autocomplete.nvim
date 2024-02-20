@@ -61,11 +61,7 @@ local function complete_changed(client, bufnr)
                     vim.api.nvim_win_close(info.preview_winid, true)
                 end
 
-                if
-                    not info.items
-                    or not info.selected
-                    or not info.selected == selected
-                then
+                if not info.items or not info.selected or not info.selected == selected then
                     return
                 end
 
@@ -84,8 +80,7 @@ local function complete_changed(client, bufnr)
 end
 
 local function text_changed(client, bufnr)
-    -- We do not want to trigger completion again if we just accepted a completion
-    if state.skip_next then
+    if vim.fn.pumvisible() == 1 then
         state.skip_next = false
         return
     end
@@ -97,9 +92,13 @@ local function text_changed(client, bufnr)
     end
 
     local char = line:sub(col, col)
-    local cmp_start = vim.fn.match(line:sub(1, col), '\\k*$')
-    local prefix = M.config.server_side_filtering and '' or line:sub(cmp_start + 1, col)
-    local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+    local prefix, cmp_start = unpack(vim.fn.matchstrpos(line:sub(1, col - 1), '\\k*$'))
+    prefix = M.config.server_side_filtering and '' or prefix:lower()
+
+    local context = {
+        triggerKind = vim.lsp.protocol.CompletionTriggerKind.Invoked,
+        triggerCharacter = '',
+    }
 
     -- Check if we are triggering completion automatically or on trigger character
     if
@@ -108,18 +107,25 @@ local function text_changed(client, bufnr)
             char
         )
     then
-        params.context = {
+        context = {
             triggerKind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter,
             triggerCharacter = char,
         }
     else
-        params.context = {
-            triggerKind = vim.lsp.protocol.CompletionTriggerKind.Invoked,
-            triggerCharacter = '',
-        }
+        -- We do not want to trigger completion again if we just accepted a completion
+        -- We check it here because trigger characters call complete done
+        if state.skip_next then
+            state.skip_next = false
+            return
+        end
     end
 
     util.debounce('completion', M.config.debounce_delay, function()
+        local params = vim.lsp.util.make_position_params(
+            vim.api.nvim_get_current_win(),
+            client.offset_encoding
+        )
+        params.context = context
         return util.request(
             client,
             methods.textDocument_completion,
