@@ -31,7 +31,8 @@ call setup with no arguments for default.
 -- LSP signature help
 require("autocomplete.signature").setup {
     border = nil, -- Signature help border style
-    max_width = nil, -- Max width of signature window
+    width = 80, -- Max width of signature window
+    height = 25, -- Max height of signature window
     debounce_delay = 100
 }
 

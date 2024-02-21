@@ -13,10 +13,18 @@ local state = {
 }
 
 local function complete_done(client, bufnr)
-    local item = vim.tbl_get(vim.v, 'completed_item', 'user_data', 'nvim', 'lsp', 'completion_item')
-    if not item then
+    if
+        not vim.v
+        or not vim.v.completed_item
+        or not vim.v.completed_item.user_data
+        or not vim.v.completed_item.user_data.nvim
+        or not vim.v.completed_item.user_data.nvim.lsp
+        or not vim.v.completed_item.user_data.nvim.lsp.completion_item
+    then
         return
     end
+
+    local item = vim.v.completed_item.user_data.nvim.lsp.completion_item
 
     if vim.tbl_isempty(item.additionalTextEdits or {}) then
         util.debounce(state.entries.edit, M.config.debounce_delay, function()
@@ -40,12 +48,18 @@ local function complete_done(client, bufnr)
 end
 
 local function complete_changed(client, bufnr)
-    local item =
-        vim.tbl_get(vim.v.event, 'completed_item', 'user_data', 'nvim', 'lsp', 'completion_item')
-    if not item then
+    if
+        not vim.v.event
+        or not vim.v.event.completed_item
+        or not vim.v.event.completed_item.user_data
+        or not vim.v.event.completed_item.user_data.nvim
+        or not vim.v.event.completed_item.user_data.nvim.lsp
+        or not vim.v.event.completed_item.user_data.nvim.lsp.completion_item
+    then
         return
     end
 
+    local item = vim.v.event.completed_item.user_data.nvim.lsp.completion_item
     local data = vim.fn.complete_info()
     local selected = data.selected
 
@@ -62,8 +76,8 @@ local function complete_changed(client, bufnr)
                 return
             end
 
-            local value = vim.tbl_get(result, 'documentation', 'value')
-            if value then
+            if result.documentation and result.documentation.value then
+                local value = result.documentation.value
                 local wininfo = vim.api.nvim_complete_set(selected, { info = value })
                 if wininfo.winid and wininfo.bufnr then
                     vim.wo[wininfo.winid].conceallevel = 2
