@@ -1,4 +1,4 @@
-*autocomplete.txt*        For NVIM v0.10.0       Last change: 2024 February 20
+*autocomplete.txt*        For NVIM v0.10.0       Last change: 2024 February 21
 
 ==============================================================================
 Table of Contents                             *autocomplete-table-of-contents*
@@ -52,7 +52,8 @@ can just call setup with no arguments for default.
     -- LSP signature help
     require("autocomplete.signature").setup {
         border = nil, -- Signature help border style
-        max_width = nil, -- Max width of signature window
+        width = 80, -- Max width of signature window
+        height = 25, -- Max height of signature window
         debounce_delay = 100
     }
     
