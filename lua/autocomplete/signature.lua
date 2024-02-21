@@ -18,7 +18,17 @@ local function open_win(lines)
     end
 
     if not state.window.id or not vim.api.nvim_win_is_valid(state.window.id) then
-        local width, height = vim.lsp.util._make_floating_popup_size(lines, {
+        local ft = 'markdown'
+        local lines_to_set = { unpack(lines, 1, 3) }
+        if vim.startswith(lines[1], '```') then
+            local found = lines[1]:gsub('```', '')
+            if ft ~= '' then
+                ft = found
+            end
+            lines_to_set = { lines[2] }
+        end
+
+        local width, height = vim.lsp.util._make_floating_popup_size(lines_to_set, {
             max_width = M.config.width,
             max_height = M.config.height,
         })
@@ -33,8 +43,8 @@ local function open_win(lines)
         vim.wo[state.window.id].wrap = true
         vim.wo[state.window.id].linebreak = true
         vim.wo[state.window.id].breakindent = false
-        vim.bo[state.window.bufnr].syntax = 'markdown'
-        vim.treesitter.start(state.window.bufnr, 'markdown')
+        vim.bo[state.window.bufnr].syntax = ft
+        vim.api.nvim_buf_set_lines(state.window.bufnr, 0, -1, false, lines_to_set)
     end
 end
 
@@ -49,22 +59,14 @@ local function signature_handler(client, result, bufnr)
     local triggers = client.server_capabilities.signatureHelpProvider.triggerCharacters
     local ft = vim.bo[bufnr].filetype
     local lines, hl = vim.lsp.util.convert_signature_help_to_markdown_lines(result, ft, triggers)
-    if not lines or vim.tbl_isempty(lines) then
+    if not lines or #lines == 0 then
         close_win()
         return
     end
-    lines = { unpack(lines, 1, 3) }
-    open_win(lines)
-    vim.api.nvim_buf_set_lines(state.window.bufnr, 0, -1, false, lines)
 
+    open_win(lines)
     if hl then
-        vim.api.nvim_buf_add_highlight(
-            state.window.bufnr,
-            state.ns,
-            'PmenuSel',
-            vim.startswith(lines[1], '```') and 1 or 0,
-            unpack(hl)
-        )
+        vim.api.nvim_buf_add_highlight(state.window.bufnr, state.ns, 'PmenuSel', 0, unpack(hl))
     end
 end
 
