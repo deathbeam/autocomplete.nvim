@@ -60,19 +60,13 @@ function M.request(client, method, params, handler, bufnr)
     end
 end
 
-function M.with_client(callback, method)
-    return function(args)
-        local bufnr = args.buf
-        local clients = vim.lsp.get_clients({ bufnr = bufnr, method = method })
-        if vim.tbl_isempty(clients) then
-            return
-        end
-
-        local client = clients[1]
-        if client then
-            callback(client, bufnr)
-        end
+function M.get_client(bufnr, method)
+    local clients = vim.lsp.get_clients({ bufnr = bufnr, method = method })
+    if vim.tbl_isempty(clients) then
+        return
     end
+
+    return clients[1]
 end
 
 return M

@@ -1,5 +1,5 @@
 # autocomplete.nvim
-Very simple and minimal autocompletion for cmdline and LSP with signature help.  
+Very simple and minimal autocompletion for cmdline and buffer using LSP and treesitter with signature help.  
 
 Originally I made this just for my dotfiles as I did not needed most of stuff existing plugins provided I had
 some issues with the ones that were close to what I wanted so as a learning exercise I decided to try and
@@ -23,7 +23,7 @@ Read the documentation of whatever you want to use.
 
 ## Usage
 
-Just require either lsp or cmd module or both and call setup on them.  
+Just require either buffer or cmd module or both and call setup on them.  
 **NOTE**: You dont need to provide the configuration, below is just default config, you can just
 call setup with no arguments for default.
 
@@ -36,9 +36,8 @@ require("autocomplete.signature").setup {
     debounce_delay = 100
 }
 
--- LSP autocompletion
-require("autocomplete.lsp").setup {
-    server_side_filtering = true, -- Use LSP filtering instead of vim's
+-- buffer autocompletion with LSP and treesitter
+require("autocomplete.buffer").setup {
     entry_mapper = nil, -- Custom completion entry mapper
     debounce_delay = 100
 }
@@ -82,7 +81,7 @@ when resolving completion items:
 -- Here we grab default Neovim capabilities and extend them with ones we want on top
 local capabilities = vim.tbl_deep_extend('force', 
     vim.lsp.protocol.make_client_capabilities(), 
-    require('completion.lsp').capabilities)
+    require('autocomplete.buffer').capabilities)
 
 -- Now set capabilities on your LSP servers
 require('lspconfig')['<YOUR_LSP_SERVER>'].setup {

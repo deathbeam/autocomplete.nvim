@@ -37,10 +37,15 @@ local function signature_handler(client, result, bufnr)
     end
 end
 
-local function cursor_moved(client, bufnr)
+local function cursor_moved(args)
     local line = vim.api.nvim_get_current_line()
     local col = vim.api.nvim_win_get_cursor(0)[2]
     if col == 0 or #line == 0 then
+        return
+    end
+
+    local client = util.get_client(args.buf, methods.textDocument_signatureHelp)
+    if not client then
         return
     end
 
@@ -61,9 +66,9 @@ local function cursor_moved(client, bufnr)
                     methods.textDocument_signatureHelp,
                     params,
                     function(result)
-                        signature_handler(client, result, bufnr)
+                        signature_handler(client, result, args.buf)
                     end,
-                    bufnr
+                    args.buf
                 )
             end)
 
@@ -88,7 +93,7 @@ function M.setup(config)
     vim.api.nvim_create_autocmd('CursorMovedI', {
         desc = 'Auto show LSP signature help',
         group = group,
-        callback = util.with_client(cursor_moved, methods.textDocument_signatureHelp),
+        callback = cursor_moved,
     })
 end
 
