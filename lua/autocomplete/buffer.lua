@@ -13,13 +13,18 @@ local state = {
 }
 
 local function complete_treesitter(bufnr, prefix, cmp_start)
-    local items = {}
+    local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
+    if not ok or not parsers.has_parser() then
+        return
+    end
+
     local ok, locals = pcall(require, 'nvim-treesitter.locals')
     if not ok then
-        return items
+        return
     end
 
     local defs = locals.get_definitions(bufnr)
+    local items = {}
 
     for _, def in ipairs(defs) do
         local node
