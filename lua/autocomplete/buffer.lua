@@ -54,7 +54,7 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
             items[#items + 1] = {
                 word = node_text,
                 kind = kind,
-                menu = full_text,
+                info = full_text,
                 icase = 1,
                 dup = 0,
                 empty = 0,
