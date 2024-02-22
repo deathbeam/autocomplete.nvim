@@ -34,7 +34,6 @@ local function complete_treesitter(bufnr, cmp_start)
 
         local lsp_kind
         for _, k in ipairs(vim.lsp.protocol.CompletionItemKind) do
-            vim.print(k)
             if k:lower() == kind:lower() then
                 lsp_kind = k
                 break
