@@ -16,6 +16,9 @@ for completion menu and closing windows properly from cmdline callbacks.
 
 For installation instructions/repository go [here](https://github.com/neovim/neovim)
 
+If you want to use treesitter autocompletion (as fallback when you dont have LSP server running) you also need to have
+[nvim-treesitter plugin](https://github.com/nvim-treesitter/nvim-treesitter)
+
 ## Installation
 
 Just use [lazy.nvim](https://github.com/folke/lazy.nvim) or `:h packages` with git submodules or something else I don't care.
