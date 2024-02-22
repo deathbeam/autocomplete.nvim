@@ -20,22 +20,15 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
     end
 
     local locals = require('nvim-treesitter.locals')
-    local defs = locals.get_definitions(bufnr)
+    local defs = locals.get_definitions_lookup_table(bufnr)
     local items = {}
 
-    for _, def in ipairs(defs) do
-        local node
-        local kind
-        for k, cap in pairs(def) do
-            if k ~= 'associated' then
-                node = cap.node
-                kind = k
-                break
-            end
-        end
-
-        if node then
-            -- Use nicer name for completion kind
+    for id, entry in pairs(defs) do
+        local name = id:match('k_(.+)_%d+_%d+_%d+_%d+$')
+        local node = entry.node
+        local kind = entry.kind
+        if node and kind then
+            vim.print(name, kind)
             for _, k in ipairs(vim.lsp.protocol.CompletionItemKind) do
                 if string.find(k:lower(), kind:lower()) then
                     kind = k
@@ -43,16 +36,16 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
                 end
             end
 
-            -- Get full text of the node
             local start_line_node, _, _ = node:start()
+            local end_line_node, _, _ = node:end_()
+
             local full_text = vim.trim(
-                vim.api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1]
+                vim.api.nvim_buf_get_lines(bufnr, start_line_node, end_line_node + 1, false)[1]
                     or ''
             )
-            local node_text = vim.treesitter.get_node_text(node, bufnr)
 
             items[#items + 1] = {
-                word = node_text,
+                word = name,
                 kind = kind,
                 info = full_text,
                 icase = 1,
