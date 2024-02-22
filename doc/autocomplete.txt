@@ -35,6 +35,10 @@ callbacks.
 For installation instructions/repository go here
 <https://github.com/neovim/neovim>
 
+If you want to use treesitter autocompletion (as fallback when you dont have
+LSP server running) you also need to have nvim-treesitter plugin
+<https://github.com/nvim-treesitter/nvim-treesitter>
+
 
 INSTALLATION                     *autocomplete-autocomplete.nvim-installation*
 
