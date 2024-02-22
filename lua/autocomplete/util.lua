@@ -44,7 +44,7 @@ function M.request(client, method, params, handler, bufnr)
         end
 
         vim.schedule(function()
-            if not vim.api.nvim_buf_is_valid(ctx.bufnr) or not vim.fn.mode() == 'i' then
+            if not vim.api.nvim_buf_is_valid(ctx.bufnr) or vim.fn.mode() ~= 'i' then
                 return
             end
 

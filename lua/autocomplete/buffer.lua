@@ -157,6 +157,10 @@ local function complete_done(args)
 end
 
 local function complete_changed(args)
+    if not string.find(vim.o.completeopt, 'popup') then
+        return
+    end
+
     if
         not vim.v.event
         or not vim.v.event.completed_item
@@ -252,13 +256,11 @@ function M.setup(config)
         callback = complete_done,
     })
 
-    if string.find(vim.o.completeopt, 'popup') then
-        vim.api.nvim_create_autocmd('CompleteChanged', {
-            desc = 'Auto show LSP documentation',
-            group = group,
-            callback = complete_changed,
-        })
-    end
+    vim.api.nvim_create_autocmd('CompleteChanged', {
+        desc = 'Auto show LSP documentation',
+        group = group,
+        callback = complete_changed,
+    })
 end
 
 return M
