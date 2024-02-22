@@ -68,12 +68,11 @@ You also probably want to enable `popup` in completeopt to show documentation pr
 vim.o.completeopt = 'menuone,noinsert,popup'
 ```
 
-If you want to disable `<CR>` to accept completion (as with autocomplete its disgustingly annoying) you can do this:
+If you want to disable `<CR>` to accept completion (as with autocomplete its very annoying) you can do this:
 
 ```lua
--- Disable <CR> to accept (this really should be a mapping, so stupid)
 vim.keymap.set("i", "<CR>", function()
-    return vim.fn.pumvisible() ~= 0 and "<Esc>o" or "<CR>"
+    return vim.fn.pumvisible() ~= 0 and "<C-e><CR>" or "<CR>"
 end, { expr = true, replace_keycodes = true })
 ```
 
@@ -84,7 +83,7 @@ when resolving completion items:
 -- Here we grab default Neovim capabilities and extend them with ones we want on top
 local capabilities = vim.tbl_deep_extend('force', 
     vim.lsp.protocol.make_client_capabilities(), 
-    require('autocomplete.buffer').capabilities)
+    require('autocomplete.capabilities'))
 
 -- Now set capabilities on your LSP servers
 require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
