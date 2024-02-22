@@ -13,7 +13,7 @@ Table of Contents                             *autocomplete-table-of-contents*
 1. autocomplete.nvim                          *autocomplete-autocomplete.nvim*
 
 Very simple and minimal autocompletion for cmdline and buffer using LSP and
-treesitter with signature help.
+Tree-sitter with signature help.
 
 Originally I made this just for my dotfiles as I did not needed most of stuff
 existing plugins provided I had some issues with the ones that were close to
@@ -35,7 +35,7 @@ callbacks.
 For installation instructions/repository go here
 <https://github.com/neovim/neovim>
 
-If you want to use treesitter autocompletion (as fallback when you dont have
+If you want to use Tree-sitter autocompletion (as fallback when you dont have
 LSP server running) you also need to have nvim-treesitter plugin
 <https://github.com/nvim-treesitter/nvim-treesitter>
 
@@ -62,7 +62,7 @@ config, you can just call setup with no arguments for default.
         debounce_delay = 100
     }
     
-    -- buffer autocompletion with LSP and treesitter
+    -- buffer autocompletion with LSP and Tree-sitter
     require("autocomplete.buffer").setup {
         entry_mapper = nil, -- Custom completion entry mapper
         debounce_delay = 100
