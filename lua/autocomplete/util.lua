@@ -39,16 +39,15 @@ end
 
 function M.request(client, method, params, handler, bufnr)
     local ok, cancel_id = client.request(method, params, function(err, result, ctx)
-        if
-            err
-            or not result
-            or not vim.api.nvim_buf_is_valid(ctx.bufnr)
-            or not vim.fn.mode() == 'i'
-        then
+        if err or not result then
             return
         end
 
         vim.schedule(function()
+            if not vim.api.nvim_buf_is_valid(ctx.bufnr) or not vim.fn.mode() == 'i' then
+                return
+            end
+
             handler(result)
         end)
     end, bufnr)

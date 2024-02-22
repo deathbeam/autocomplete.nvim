@@ -13,16 +13,13 @@ local state = {
 }
 
 local function complete_treesitter(bufnr, prefix, cmp_start)
+    -- Check if treesitter is available
     local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
     if not ok or not parsers.has_parser() then
         return
     end
 
-    local ok, locals = pcall(require, 'nvim-treesitter.locals')
-    if not ok then
-        return
-    end
-
+    local locals = require('nvim-treesitter.locals')
     local defs = locals.get_definitions(bufnr)
     local items = {}
 
@@ -37,25 +34,27 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
             end
         end
 
-        local lsp_kind
-        if not lsp_kind then
+        if node then
+            -- Use nicer name for completion kind
             for _, k in ipairs(vim.lsp.protocol.CompletionItemKind) do
                 if string.find(k:lower(), kind:lower()) then
-                    lsp_kind = k
+                    kind = k
                     break
                 end
             end
-        end
 
-        if not lsp_kind then
-            lsp_kind = 'Unknown'
-        end
+            -- Get full text of the node
+            local start_line_node, _, _ = node:start()
+            local full_text = vim.trim(
+                vim.api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1]
+                    or ''
+            )
+            local node_text = vim.treesitter.get_node_text(node, bufnr)
 
-        if node then
             items[#items + 1] = {
-                word = vim.treesitter.get_node_text(node, 0),
-                kind = lsp_kind,
-                menu = 'Treesitter',
+                word = node_text,
+                kind = kind,
+                menu = full_text,
                 icase = 1,
                 dup = 0,
                 empty = 0,
@@ -71,9 +70,7 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
         items = vim.tbl_map(M.config.entry_mapper, items)
     end
 
-    if vim.fn.mode() == 'i' then
-        vim.fn.complete(cmp_start + 1, items)
-    end
+    vim.fn.complete(cmp_start + 1, items)
 end
 
 local function complete_lsp(bufnr, cmp_start, client, char)
@@ -115,9 +112,7 @@ local function complete_lsp(bufnr, cmp_start, client, char)
             items = vim.tbl_map(M.config.entry_mapper, items)
         end
 
-        if vim.fn.mode() == 'i' then
-            vim.fn.complete(cmp_start + 1, items)
-        end
+        vim.fn.complete(cmp_start + 1, items)
     end, bufnr)
 end
 
