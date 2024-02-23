@@ -12,6 +12,18 @@ local state = {
     },
 }
 
+local function complete(bufnr, prefix, cmp_start, items)
+    items = vim.tbl_filter(function(item)
+        return item.kind ~= 'Snippet' and #vim.fn.matchfuzzy({ item.word }, prefix) > 0
+    end, items)
+
+    if M.config.entry_mapper then
+        items = vim.tbl_map(M.config.entry_mapper, items)
+    end
+
+    vim.fn.complete(cmp_start + 1, items)
+end
+
 local function complete_treesitter(bufnr, prefix, cmp_start)
     -- Check if treesitter is available
     local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
@@ -55,18 +67,10 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
         end
     end
 
-    items = vim.tbl_filter(function(item)
-        return #vim.fn.matchfuzzy({ item.word }, prefix) > 0
-    end, items)
-
-    if M.config.entry_mapper then
-        items = vim.tbl_map(M.config.entry_mapper, items)
-    end
-
-    vim.fn.complete(cmp_start + 1, items)
+    complete(bufnr, prefix, cmp_start, items)
 end
 
-local function complete_lsp(bufnr, cmp_start, client, char)
+local function complete_lsp(bufnr, prefix, cmp_start, client, char)
     local context = {
         triggerKind = vim.lsp.protocol.CompletionTriggerKind.Invoked,
         triggerCharacter = '',
@@ -97,15 +101,7 @@ local function complete_lsp(bufnr, cmp_start, client, char)
     params.context = context
     return util.request(client, methods.textDocument_completion, params, function(result)
         local items = vim.lsp._completion._lsp_to_complete_items(result, '')
-        items = vim.tbl_filter(function(item)
-            return item.kind ~= 'Snippet'
-        end, items)
-
-        if M.config.entry_mapper then
-            items = vim.tbl_map(M.config.entry_mapper, items)
-        end
-
-        vim.fn.complete(cmp_start + 1, items)
+        complete(bufnr, prefix, cmp_start, items)
     end, bufnr)
 end
 
@@ -217,7 +213,7 @@ local function text_changed(args)
     util.debounce(state.entries.completion, M.config.debounce_delay, function()
         local client = util.get_client(args.buf, methods.textDocument_completion)
         if client then
-            complete_lsp(args.buf, cmp_start, client, line:sub(col, col))
+            complete_lsp(args.buf, prefix, cmp_start, client, line:sub(col, col))
         else
             complete_treesitter(args.buf, prefix, cmp_start)
         end
