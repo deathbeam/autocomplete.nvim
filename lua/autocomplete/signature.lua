@@ -54,7 +54,7 @@ local function cursor_moved(args)
     -- Try to find signature help trigger character in current line
     for _, c in ipairs(client.server_capabilities.signatureHelpProvider.triggerCharacters or {}) do
         if string.find(before_line, '[' .. c .. ']') then
-            local params = vim.lsp.util.make_position_params(args.buf, client.offset_encoding)
+            local params = vim.lsp.util.make_position_params(vim.api.nvim_get_current_win(), client.offset_encoding)
             params.context = {
                 triggerKind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter,
                 triggerCharacter = c,
