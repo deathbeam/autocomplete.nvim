@@ -105,6 +105,30 @@ local function complete_lsp(bufnr, prefix, cmp_start, client, char)
     end, bufnr)
 end
 
+local function text_changed(args)
+    if vim.fn.pumvisible() == 1 then
+        state.skip_next = false
+        return
+    end
+
+    local line = vim.api.nvim_get_current_line()
+    local col = vim.api.nvim_win_get_cursor(0)[2]
+    if col == 0 or #line == 0 then
+        return
+    end
+
+    local prefix, cmp_start = unpack(vim.fn.matchstrpos(line:sub(1, col), '\\k*$'))
+
+    util.debounce(state.entries.completion, M.config.debounce_delay, function()
+        local client = util.get_client(args.buf, methods.textDocument_completion)
+        if client then
+            complete_lsp(args.buf, prefix, cmp_start, client, line:sub(col, col))
+        else
+            complete_treesitter(args.buf, prefix, cmp_start)
+        end
+    end)
+end
+
 local function complete_done(args)
     if
         not vim.v
@@ -193,30 +217,6 @@ local function complete_changed(args)
                 end
             end
         end, args.buf)
-    end)
-end
-
-local function text_changed(args)
-    if vim.fn.pumvisible() == 1 then
-        state.skip_next = false
-        return
-    end
-
-    local line = vim.api.nvim_get_current_line()
-    local col = vim.api.nvim_win_get_cursor(0)[2]
-    if col == 0 or #line == 0 then
-        return
-    end
-
-    local prefix, cmp_start = unpack(vim.fn.matchstrpos(line:sub(1, col), '\\k*$'))
-
-    util.debounce(state.entries.completion, M.config.debounce_delay, function()
-        local client = util.get_client(args.buf, methods.textDocument_completion)
-        if client then
-            complete_lsp(args.buf, prefix, cmp_start, client, line:sub(col, col))
-        else
-            complete_treesitter(args.buf, prefix, cmp_start)
-        end
     end)
 end
 
