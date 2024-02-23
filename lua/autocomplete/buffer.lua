@@ -12,7 +12,7 @@ local state = {
     },
 }
 
-local function complete(bufnr, prefix, cmp_start, items)
+local function complete(prefix, cmp_start, items)
     items = vim.tbl_filter(function(item)
         return item.kind ~= 'Snippet' and #vim.fn.matchfuzzy({ item.word }, prefix) > 0
     end, items)
@@ -66,7 +66,7 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
         end
     end
 
-    complete(bufnr, prefix, cmp_start, items)
+    complete(prefix, cmp_start, items)
 end
 
 local function complete_lsp(bufnr, prefix, cmp_start, client, char)
@@ -100,7 +100,7 @@ local function complete_lsp(bufnr, prefix, cmp_start, client, char)
     params.context = context
     return util.request(client, methods.textDocument_completion, params, function(result)
         local items = vim.lsp._completion._lsp_to_complete_items(result, '')
-        complete(bufnr, prefix, cmp_start, items)
+        complete(prefix, cmp_start, items)
     end, bufnr)
 end
 
