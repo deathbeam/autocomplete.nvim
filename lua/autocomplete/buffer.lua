@@ -40,7 +40,6 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
         local node = entry.node
         local kind = entry.kind
         if node and kind then
-            vim.print(name, kind)
             for _, k in ipairs(vim.lsp.protocol.CompletionItemKind) do
                 if string.find(k:lower(), kind:lower()) then
                     kind = k
