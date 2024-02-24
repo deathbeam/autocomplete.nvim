@@ -14,7 +14,8 @@ local state = {
 
 local function complete(prefix, cmp_start, items)
     items = vim.tbl_filter(function(item)
-        return item.kind ~= 'Snippet' and (#prefix == 0 or #vim.fn.matchfuzzy({ item.word }, prefix) > 0)
+        return item.kind ~= 'Snippet'
+            and (#prefix == 0 or #vim.fn.matchfuzzy({ item.word }, prefix) > 0)
     end, items)
 
     if M.config.entry_mapper then
