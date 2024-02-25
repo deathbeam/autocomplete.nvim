@@ -65,7 +65,13 @@ function M.get_client(bufnr, method)
         return
     end
 
-    return clients[1]
+    for _, client in ipairs(clients) do
+        if client.name ~= 'copilot' then
+            return client
+        end
+    end
+
+    return nil
 end
 
 return M

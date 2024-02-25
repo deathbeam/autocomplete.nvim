@@ -25,6 +25,26 @@ local function complete(prefix, cmp_start, items)
     vim.fn.complete(cmp_start + 1, items)
 end
 
+local function update_info(info, value, selected)
+    if not value or #value == 0 then
+        return false
+    end
+
+    if info.preview_winid and vim.api.nvim_win_is_valid(info.preview_winid) then
+        vim.api.nvim_win_close(info.preview_winid, true)
+    end
+
+    local wininfo = vim.api.nvim_complete_set(selected, { info = value })
+    if wininfo.winid and wininfo.bufnr then
+        vim.wo[wininfo.winid].conceallevel = 2
+        vim.wo[wininfo.winid].concealcursor = 'niv'
+        vim.bo[wininfo.bufnr].syntax = 'markdown'
+        return true
+    end
+
+    return false
+end
+
 local function complete_treesitter(bufnr, prefix, cmp_start)
     -- Check if treesitter is available
     local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
@@ -34,6 +54,7 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
 
     local locals = require('nvim-treesitter.locals')
     local defs = locals.get_definitions_lookup_table(bufnr)
+    local ft = vim.bo[bufnr].filetype
     local items = {}
 
     for id, entry in pairs(defs) do
@@ -56,6 +77,7 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
                     or ''
             )
 
+            full_text = '```' .. ft .. '\n' .. full_text .. '\n```'
             items[#items + 1] = {
                 word = name,
                 kind = kind,
@@ -174,49 +196,47 @@ local function complete_changed(args)
         return
     end
 
-    if
-        not vim.v.event
-        or not vim.v.event.completed_item
-        or not vim.v.event.completed_item.user_data
-        or not vim.v.event.completed_item.user_data.nvim
-        or not vim.v.event.completed_item.user_data.nvim.lsp
-        or not vim.v.event.completed_item.user_data.nvim.lsp.completion_item
-    then
+    if not vim.v.event or not vim.v.event.completed_item then
         return
     end
 
-    local client = util.get_client(args.buf, methods.completionItem_resolve)
-    if not client then
-        return
-    end
-
-    local item = vim.v.event.completed_item.user_data.nvim.lsp.completion_item
-    local data = vim.fn.complete_info()
-    local selected = data.selected
+    local cur_item = vim.v.event.completed_item
+    local cur_info = vim.fn.complete_info()
+    local selected = cur_info.selected
 
     util.debounce(state.entries.info, M.config.debounce_delay, function()
-        return util.request(client, methods.completionItem_resolve, item, function(result)
-            local info = vim.fn.complete_info()
+        if update_info(cur_info, cur_item.info, selected) then
+            return
+        end
 
-            -- FIXME: Preview popup do not auto resizes to fit new content so have to reset it like this
-            if info.preview_winid and vim.api.nvim_win_is_valid(info.preview_winid) then
-                vim.api.nvim_win_close(info.preview_winid, true)
-            end
+        local completion_item = vim.tbl_get(cur_item, 'user_data', 'nvim', 'lsp', 'completion_item')
+        if not completion_item then
+            return
+        end
 
-            if not info.items or not info.selected or not info.selected == selected then
-                return
-            end
+        local client = util.get_client(args.buf, methods.completionItem_resolve)
+        if not client then
+            return
+        end
 
-            if result.documentation and result.documentation.value then
-                local value = result.documentation.value
-                local wininfo = vim.api.nvim_complete_set(selected, { info = value })
-                if wininfo.winid and wininfo.bufnr then
-                    vim.wo[wininfo.winid].conceallevel = 2
-                    vim.wo[wininfo.winid].concealcursor = 'niv'
-                    vim.bo[wininfo.bufnr].syntax = 'markdown'
+        return util.request(
+            client,
+            methods.completionItem_resolve,
+            completion_item,
+            function(result)
+                if not result.documentation then
+                    return
                 end
-            end
-        end, args.buf)
+
+                local info = vim.fn.complete_info()
+                if not info.items or not info.selected or not info.selected == selected then
+                    return
+                end
+
+                update_info(info, result.documentation.value, selected)
+            end,
+            args.buf
+        )
     end)
 end
 
