@@ -30,6 +30,7 @@ local function update_info(info, value, selected)
         return false
     end
 
+    -- FIXME: This is a workaround to fix the issue with the completion popup not adjusting its size when contents change
     if info.preview_winid and vim.api.nvim_win_is_valid(info.preview_winid) then
         vim.api.nvim_win_close(info.preview_winid, true)
     end
