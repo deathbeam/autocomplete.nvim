@@ -1,4 +1,4 @@
-*autocomplete.txt*        For NVIM v0.10.0       Last change: 2024 February 25
+*autocomplete.txt*        For NVIM v0.10.0       Last change: 2024 February 26
 
 ==============================================================================
 Table of Contents                             *autocomplete-table-of-contents*
