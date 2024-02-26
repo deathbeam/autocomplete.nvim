@@ -59,6 +59,7 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
     local items = {}
 
     for id, entry in pairs(defs) do
+        -- FIXME: This is not pretty, the format of the ID is not documented and might change, but its fastest way
         local name = id:match('k_(.+)_%d+_%d+_%d+_%d+$')
         local node = entry.node
         local kind = entry.kind
@@ -123,6 +124,7 @@ local function complete_lsp(bufnr, prefix, cmp_start, client, char)
         vim.lsp.util.make_position_params(vim.api.nvim_get_current_win(), client.offset_encoding)
     params.context = context
     return util.request(client, methods.textDocument_completion, params, function(result)
+        -- FIXME: Maybe dont use interal lsp functions? Idk why its not exposed and the parent method is marked as deprecated
         local items = vim.lsp._completion._lsp_to_complete_items(result, '')
         complete(prefix, cmp_start, items)
     end, bufnr)
