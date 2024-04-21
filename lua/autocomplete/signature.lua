@@ -93,7 +93,7 @@ function M.setup(config)
     state.entry = util.entry()
     local group = vim.api.nvim_create_augroup('LspSignatureHelp', {})
 
-    vim.api.nvim_create_autocmd('CursorMovedI', {
+    vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
         desc = 'Auto show LSP signature help',
         group = group,
         callback = cursor_moved,
