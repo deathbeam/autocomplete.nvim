@@ -25,14 +25,9 @@ local function complete(prefix, cmp_start, items)
     vim.fn.complete(cmp_start + 1, items)
 end
 
-local function update_info(info, value, selected)
+local function update_info(value, selected)
     if not value or #value == 0 then
         return false
-    end
-
-    -- FIXME: This is a workaround to fix the issue with the completion popup not adjusting its size when contents change
-    if info.preview_winid and vim.api.nvim_win_is_valid(info.preview_winid) then
-        vim.api.nvim_win_close(info.preview_winid, true)
     end
 
     local wininfo = vim.api.nvim_complete_set(selected, { info = value })
@@ -208,10 +203,6 @@ local function complete_changed(args)
     local selected = cur_info.selected
 
     util.debounce(state.entries.info, M.config.debounce_delay, function()
-        if update_info(cur_info, cur_item.info, selected) then
-            return
-        end
-
         local completion_item = vim.tbl_get(cur_item, 'user_data', 'nvim', 'lsp', 'completion_item')
         if not completion_item then
             return
@@ -236,7 +227,7 @@ local function complete_changed(args)
                     return
                 end
 
-                update_info(info, result.documentation.value, selected)
+                update_info(result.documentation.value, selected)
             end,
             args.buf
         )

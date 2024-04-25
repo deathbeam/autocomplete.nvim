@@ -66,7 +66,7 @@ function M.get_client(bufnr, method)
     end
 
     for _, client in ipairs(clients) do
-        if client.name ~= 'copilot' then
+        if not string.find(client.name:lower(), 'copilot') then
             return client
         end
     end
