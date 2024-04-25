@@ -25,22 +25,6 @@ local function complete(prefix, cmp_start, items)
     vim.fn.complete(cmp_start + 1, items)
 end
 
-local function update_info(value, selected)
-    if not value or #value == 0 then
-        return false
-    end
-
-    local wininfo = vim.api.nvim_complete_set(selected, { info = value })
-    if wininfo.winid and wininfo.bufnr then
-        vim.wo[wininfo.winid].conceallevel = 2
-        vim.wo[wininfo.winid].concealcursor = 'niv'
-        vim.bo[wininfo.bufnr].syntax = 'markdown'
-        return true
-    end
-
-    return false
-end
-
 local function complete_treesitter(bufnr, prefix, cmp_start)
     -- Check if treesitter is available
     local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
@@ -218,7 +202,7 @@ local function complete_changed(args)
             methods.completionItem_resolve,
             completion_item,
             function(result)
-                if not result.documentation then
+                if not result.documentation or not result.documentation.value or #result.documentation.value == 0 then
                     return
                 end
 
@@ -227,7 +211,12 @@ local function complete_changed(args)
                     return
                 end
 
-                update_info(result.documentation.value, selected)
+                local wininfo = vim.api.nvim_complete_set(selected, { info = result.documentation.value })
+                if wininfo.winid and wininfo.bufnr then
+                    vim.wo[wininfo.winid].conceallevel = 2
+                    vim.wo[wininfo.winid].concealcursor = 'niv'
+                    vim.bo[wininfo.bufnr].syntax = 'markdown'
+                end
             end,
             args.buf
         )
