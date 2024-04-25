@@ -221,6 +221,7 @@ local function complete_changed(args)
                     vim.wo[wininfo.winid].conceallevel = 2
                     vim.wo[wininfo.winid].concealcursor = 'niv'
                     vim.bo[wininfo.bufnr].syntax = 'markdown'
+                    vim.treesitter.start(wininfo.bufnr, 'markdown')
                 end
             end,
             args.buf
