@@ -202,7 +202,11 @@ local function complete_changed(args)
             methods.completionItem_resolve,
             completion_item,
             function(result)
-                if not result.documentation or not result.documentation.value or #result.documentation.value == 0 then
+                if
+                    not result.documentation
+                    or not result.documentation.value
+                    or #result.documentation.value == 0
+                then
                     return
                 end
 
@@ -211,7 +215,8 @@ local function complete_changed(args)
                     return
                 end
 
-                local wininfo = vim.api.nvim_complete_set(selected, { info = result.documentation.value })
+                local wininfo =
+                    vim.api.nvim_complete_set(selected, { info = result.documentation.value })
                 if wininfo.winid and wininfo.bufnr then
                     vim.wo[wininfo.winid].conceallevel = 2
                     vim.wo[wininfo.winid].concealcursor = 'niv'
