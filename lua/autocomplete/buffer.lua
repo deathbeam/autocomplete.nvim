@@ -133,46 +133,6 @@ local function text_changed(args)
     end)
 end
 
-local function complete_done(args)
-    if
-        not vim.v
-        or not vim.v.completed_item
-        or not vim.v.completed_item.user_data
-        or not vim.v.completed_item.user_data.nvim
-        or not vim.v.completed_item.user_data.nvim.lsp
-        or not vim.v.completed_item.user_data.nvim.lsp.completion_item
-    then
-        return
-    end
-
-    local client = util.get_client(args.buf, methods.completionItem_resolve)
-    if not client then
-        return
-    end
-
-    local item = vim.v.completed_item.user_data.nvim.lsp.completion_item
-
-    if vim.tbl_isempty(item.additionalTextEdits or {}) then
-        util.debounce(state.entries.edit, M.config.debounce_delay, function()
-            return util.request(client, methods.completionItem_resolve, item, function(result)
-                if vim.tbl_isempty(result.additionalTextEdits or {}) then
-                    return
-                end
-
-                vim.lsp.util.apply_text_edits(
-                    result.additionalTextEdits,
-                    args.buf,
-                    client.offset_encoding
-                )
-            end, args.buf)
-        end)
-    else
-        vim.lsp.util.apply_text_edits(item.additionalTextEdits, args.buf, client.offset_encoding)
-    end
-
-    state.skip_next = true
-end
-
 local function complete_changed(args)
     if not string.find(vim.o.completeopt, 'popup') then
         return
@@ -248,16 +208,22 @@ function M.setup(config)
         callback = text_changed,
     })
 
-    vim.api.nvim_create_autocmd('CompleteDone', {
-        desc = 'Auto apply LSP completion edits after selection',
-        group = group,
-        callback = complete_done,
-    })
-
     vim.api.nvim_create_autocmd('CompleteChanged', {
         desc = 'Auto show LSP documentation',
         group = group,
         callback = complete_changed,
+    })
+
+    vim.api.nvim_create_autocmd('LspAttach', {
+        desc = 'Attach completion events',
+        group = group,
+        callback = function(event)
+            local client = util.get_client(event.buf, methods.textDocument_completion)
+            if not client then
+                return
+            end
+            vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = false })
+        end,
     })
 end
 
