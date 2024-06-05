@@ -121,7 +121,7 @@ local function text_changed(args)
         return
     end
 
-    local prefix, cmp_start = unpack(vim.fn.matchstrpos(line:sub(1, col), '\\k*$'))
+    local prefix, cmp_start = unpack(vim.fn.matchstrpos(line:sub(1, col), [[\k*$]]))
 
     util.debounce(state.entries.completion, M.config.debounce_delay, function()
         local client = util.get_client(args.buf, methods.textDocument_completion)
