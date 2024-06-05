@@ -7,7 +7,6 @@ return {
                     properties = {
                         'documentation',
                         'detail',
-                        'additionalTextEdits',
                     },
                 },
             },

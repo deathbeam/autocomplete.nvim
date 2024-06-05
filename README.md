@@ -68,7 +68,7 @@ You also probably want to enable `popup` in completeopt to show documentation pr
 vim.o.completeopt = 'menuone,noinsert,popup'
 ```
 
-And you also ideally want to set the capabilities so Neovim will fetch documentation and additional text edits
+And you also ideally want to set the capabilities so Neovim will fetch documentation
 when resolving completion items:
 
 ```lua

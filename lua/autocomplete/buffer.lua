@@ -4,7 +4,6 @@ local methods = vim.lsp.protocol.Methods
 local M = {}
 
 local state = {
-    skip_next = false,
     entries = {
         completion = nil,
         info = nil,
@@ -14,8 +13,7 @@ local state = {
 
 local function complete(prefix, cmp_start, items)
     items = vim.tbl_filter(function(item)
-        return item.kind ~= 'Snippet'
-            and (#prefix == 0 or #vim.fn.matchfuzzy({ item.word }, prefix) > 0)
+        return #prefix == 0 or #vim.fn.matchfuzzy({ item.word }, prefix) > 0
     end, items)
 
     if M.config.entry_mapper then
@@ -90,13 +88,6 @@ local function complete_lsp(bufnr, prefix, cmp_start, client, char)
             triggerKind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter,
             triggerCharacter = char,
         }
-    else
-        -- We do not want to trigger completion again if we just accepted a completion
-        -- We check it here because trigger characters call complete done
-        if state.skip_next then
-            state.skip_next = false
-            return
-        end
     end
 
     local params =
@@ -111,7 +102,6 @@ end
 
 local function text_changed(args)
     if vim.fn.pumvisible() == 1 then
-        state.skip_next = false
         return
     end
 
