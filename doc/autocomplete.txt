@@ -93,7 +93,7 @@ preview:
 <
 
 And you also ideally want to set the capabilities so Neovim will fetch
-documentation and additional text edits when resolving completion items:
+documentation when resolving completion items:
 
 >lua
     -- Here we grab default Neovim capabilities and extend them with ones we want on top
