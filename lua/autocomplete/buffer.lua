@@ -20,6 +20,18 @@ local function complete(prefix, cmp_start, items)
         items = vim.tbl_map(M.config.entry_mapper, items)
     end
 
+    table.sort(items, function(a, b)
+        local _, entry1_under = a.word:find "^_+"
+        local _, entry2_under = b.word:find "^_+"
+        entry1_under = entry1_under or 0
+        entry2_under = entry2_under or 0
+        if entry1_under > entry2_under then
+            return false
+        elseif entry1_under < entry2_under then
+            return true
+        end
+    end)
+
     vim.fn.complete(cmp_start + 1, items)
 end
 
@@ -95,8 +107,8 @@ local function complete_lsp(bufnr, prefix, cmp_start, client, char)
     params.context = context
     return util.request(client, methods.textDocument_completion, params, function(result)
         -- FIXME: Maybe dont use interal lsp functions? Idk why its not exposed and the parent method is marked as deprecated
-        local items = vim.lsp.completion._lsp_to_complete_items(result, '')
-        complete(prefix, cmp_start, items)
+        local items = vim.lsp.completion._lsp_to_complete_items(result, prefix)
+        complete('', cmp_start, items)
     end, bufnr)
 end
 
