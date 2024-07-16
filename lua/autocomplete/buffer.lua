@@ -21,8 +21,8 @@ local function complete(prefix, cmp_start, items)
     end
 
     table.sort(items, function(a, b)
-        local _, entry1_under = a.word:find "^_+"
-        local _, entry2_under = b.word:find "^_+"
+        local _, entry1_under = a.word:find('^_+')
+        local _, entry2_under = b.word:find('^_+')
         entry1_under = entry1_under or 0
         entry2_under = entry2_under or 0
         if entry1_under > entry2_under then
