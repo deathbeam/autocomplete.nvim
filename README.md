@@ -37,6 +37,8 @@ require("autocomplete.signature").setup {
     width = 80, -- Max width of signature window
     height = 25, -- Max height of signature window
     debounce_delay = 100
+    keymap = {}, -- Keymap to toggle signature help on or off in insert mode
+    -- keymap = { toggle_signature = '<C-Space>' },
 }
 
 -- buffer autocompletion with LSP and Tree-sitter
