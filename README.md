@@ -65,7 +65,7 @@ require("autocomplete.cmd").setup {
 You also probably want to enable `popup` in completeopt to show documentation preview:
 
 ```lua
-vim.o.completeopt = 'menuone,noinsert,popup'
+vim.o.completeopt = 'menuone,noselect,noinsert,popup'
 ```
 
 And you also ideally want to set the capabilities so Neovim will fetch documentation
@@ -75,20 +75,13 @@ when resolving completion items:
 -- Here we grab default Neovim capabilities and extend them with ones we want on top
 local capabilities = vim.tbl_deep_extend('force', 
     vim.lsp.protocol.make_client_capabilities(), 
-    require('autocomplete.capabilities'))
+    require('autocomplete.capabilities')
+)
 
 -- Now set capabilities on your LSP servers
 require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
     capabilities = capabilities
 }
-```
-
-If you want to disable `<CR>` to accept completion (as with autocomplete its very annoying) you can do this:
-
-```lua
-vim.keymap.set("i", "<CR>", function()
-    return vim.fn.pumvisible() ~= 0 and "<C-e><CR>" or "<CR>"
-end, { expr = true, replace_keycodes = true })
 ```
 
 ## Similar projects
