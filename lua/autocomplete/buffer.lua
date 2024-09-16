@@ -85,6 +85,7 @@ end
 
 local function complete_lsp(bufnr, prefix, cmp_start, client, char)
     local context = {
+        isRetrigger = true,
         triggerKind = vim.lsp.protocol.CompletionTriggerKind.Invoked,
         triggerCharacter = '',
     }
@@ -97,6 +98,7 @@ local function complete_lsp(bufnr, prefix, cmp_start, client, char)
         )
     then
         context = {
+            isRetrigger = true,
             triggerKind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter,
             triggerCharacter = char,
         }
@@ -108,7 +110,7 @@ local function complete_lsp(bufnr, prefix, cmp_start, client, char)
     return util.request(client, methods.textDocument_completion, params, function(result)
         -- FIXME: Maybe dont use interal lsp functions? Idk why its not exposed and the parent method is marked as deprecated
         local items = vim.lsp.completion._lsp_to_complete_items(result, prefix)
-        complete('', cmp_start, items)
+        complete(prefix, cmp_start, items)
     end, bufnr)
 end
 

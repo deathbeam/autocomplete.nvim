@@ -59,6 +59,7 @@ local function cursor_moved(args)
                 client.offset_encoding
             )
             params.context = {
+                isRetrigger = true,
                 triggerKind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter,
                 triggerCharacter = c,
             }
