@@ -16,7 +16,6 @@ local function signature_handler(client, result, bufnr)
         return
     end
 
-    lines = { unpack(lines, 1, 3) }
     local fbuf = vim.lsp.util.open_floating_preview(lines, 'markdown', {
         focusable = false,
         close_events = { 'CursorMoved', 'CursorMovedI', 'BufLeave', 'BufWinLeave' },
@@ -26,13 +25,14 @@ local function signature_handler(client, result, bufnr)
         anchor_bias = 'above',
     })
 
+    -- Highlight the active parameter.
     if hl then
-        vim.api.nvim_buf_add_highlight(
+        vim.highlight.range(
             fbuf,
             state.ns,
-            'PmenuSel',
-            vim.startswith(lines[1], '```') and 1 or 0,
-            unpack(hl)
+            'LspSignatureActiveParameter',
+            { hl[1], hl[2] },
+            { hl[3], hl[4] }
         )
     end
 end
