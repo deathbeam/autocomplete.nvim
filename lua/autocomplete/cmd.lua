@@ -219,6 +219,7 @@ end
 
 local function changed_handler()
     if not is_cmdline() then
+        close_win()
         return
     end
 
@@ -227,6 +228,7 @@ end
 
 local function enter_handler()
     if not is_cmdline() then
+        close_win()
         return
     end
 
@@ -239,11 +241,7 @@ local function leave_handler()
     util.stop(state.entry)
     state.completion.data = {}
     state.completion.last = nil
-
-    if state.window.id and vim.api.nvim_win_is_valid(state.window.id) then
-        vim.api.nvim_win_close(state.window.id, true)
-        state.window.id = nil
-    end
+    close_win()
 end
 
 M.config = {
