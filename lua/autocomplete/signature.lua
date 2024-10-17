@@ -11,6 +11,9 @@ local state = {
 local function signature_handler(client, result, bufnr)
     local triggers = client.server_capabilities.signatureHelpProvider.triggerCharacters
     local ft = vim.bo[bufnr].filetype
+    if not result.signatures or #result.signatures == 0 then
+        return
+    end
     local lines, hl = vim.lsp.util.convert_signature_help_to_markdown_lines(result, ft, triggers)
     if not lines or #lines == 0 then
         return
