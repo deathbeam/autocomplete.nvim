@@ -1,4 +1,4 @@
-*autocomplete.txt*        For NVIM v0.10.0        Last change: 2024 October 17
+*autocomplete.txt*        For NVIM v0.10.0       Last change: 2024 November 22
 
 ==============================================================================
 Table of Contents                             *autocomplete-table-of-contents*
@@ -64,8 +64,9 @@ config, you can just call setup with no arguments for default.
     
     -- buffer autocompletion with LSP and Tree-sitter
     require("autocomplete.buffer").setup {
+        border = nil, -- Documentation border style
         entry_mapper = nil, -- Custom completion entry mapper
-        debounce_delay = 100
+        debounce_delay = 100,
     }
     
     -- cmdline autocompletion
