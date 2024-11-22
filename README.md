@@ -41,8 +41,9 @@ require("autocomplete.signature").setup {
 
 -- buffer autocompletion with LSP and Tree-sitter
 require("autocomplete.buffer").setup {
+    border = nil, -- Documentation border style
     entry_mapper = nil, -- Custom completion entry mapper
-    debounce_delay = 100
+    debounce_delay = 100,
 }
 
 -- cmdline autocompletion

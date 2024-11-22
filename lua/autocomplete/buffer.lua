@@ -30,6 +30,7 @@ local function complete(prefix, cmp_start, items)
         elseif entry1_under < entry2_under then
             return true
         end
+        return false
     end)
 
     vim.fn.complete(cmp_start + 1, items)
@@ -150,6 +151,14 @@ local function complete_changed(args)
     local cur_info = vim.fn.complete_info()
     local selected = cur_info.selected
 
+    if
+        M.config.border
+        and cur_info.preview_winid
+        and vim.api.nvim_win_is_valid(cur_info.preview_winid)
+    then
+        vim.api.nvim_win_set_config(cur_info.preview_winid, { border = M.config.border })
+    end
+
     util.debounce(state.entries.info, M.config.debounce_delay, function()
         local completion_item = vim.tbl_get(cur_item, 'user_data', 'nvim', 'lsp', 'completion_item')
         if not completion_item then
@@ -175,7 +184,7 @@ local function complete_changed(args)
                 end
 
                 local info = vim.fn.complete_info()
-                if not info.items or not info.selected or not info.selected == selected then
+                if not info.items or not info.selected or info.selected ~= selected then
                     return
                 end
 
@@ -195,6 +204,7 @@ local function complete_changed(args)
 end
 
 M.config = {
+    border = nil, -- Documentation border style
     entry_mapper = nil, -- Custom completion entry mapper
     debounce_delay = 100,
 }
@@ -225,6 +235,9 @@ function M.setup(config)
         callback = function(event)
             local client = util.get_client(event.buf, methods.textDocument_completion)
             if not client then
+                return
+            end
+            if not vim.lsp.completion or not vim.lsp.completion.enable then
                 return
             end
             vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = false })
