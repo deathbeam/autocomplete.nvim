@@ -3,6 +3,11 @@ local methods = vim.lsp.protocol.Methods
 
 local M = {}
 
+-- Flag to track the visibility of the signature window
+M.signature_open = false
+-- Reference to the floating window buffer
+M.floating_buf = nil
+
 local state = {
     entry = nil,
     ns = nil,
@@ -27,6 +32,8 @@ local function signature_handler(client, result, bufnr)
         max_height = M.config.height,
         anchor_bias = 'above',
     })
+    M.floating_buf = fbuf
+    M.signature_open = true
 
     -- Highlight the active parameter.
     if hl then
@@ -89,7 +96,22 @@ M.config = {
     width = 80, -- Max width of signature window
     height = 25, -- Max height of signature window
     debounce_delay = 100,
+    keymap = {}, -- Keymap to toggle signature in insert mode
 }
+
+function M.toggle_signature()
+    if M.signature_open then
+        -- Attempt to close the signature window if it's open
+        if M.floating_buf then
+            vim.api.nvim_buf_delete(M.floating_buf, { force = true })
+            M.floating_buf = nil
+        end
+        M.signature_open = false
+    else
+        -- Trigger showing the signature window only if it's not already open
+        cursor_moved({ buf = vim.api.nvim_get_current_buf() })
+    end
+end
 
 function M.setup(config)
     M.config = vim.tbl_deep_extend('force', M.config, config or {})
@@ -102,6 +124,12 @@ function M.setup(config)
         group = group,
         callback = cursor_moved,
     })
+
+    -- Expose the toggle function
+    if config and config.keymap then
+        local map = config.keymap
+        vim.keymap.set('i', map.toggle_signature, M.toggle_signature)
+    end
 end
 
 return M
