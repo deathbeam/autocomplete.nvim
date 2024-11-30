@@ -194,7 +194,10 @@ local function complete_changed(args)
                     vim.wo[wininfo.winid].conceallevel = 2
                     vim.wo[wininfo.winid].concealcursor = 'niv'
                     vim.bo[wininfo.bufnr].syntax = 'markdown'
-                    vim.api.nvim_win_set_config(wininfo.winid, { border = M.config.border })
+                    vim.api.nvim_win_set_config(wininfo.winid, {
+                        border = M.config.border,
+                        focusable = false,
+                    })
                     -- FIXME: Treesitter is *very* buggy with some LSPs, do not use. Already thought it was fixed once before but no
                     -- vim.treesitter.start(wininfo.bufnr, 'markdown')
                 end
