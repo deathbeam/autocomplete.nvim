@@ -12,6 +12,10 @@ local state = {
 }
 
 local function complete(prefix, cmp_start, items)
+    if vim.fn.mode() ~= 'i' then
+        return
+    end
+
     items = vim.tbl_filter(function(item)
         return #prefix == 0 or #vim.fn.matchfuzzy({ item.word }, prefix) > 0
     end, items)
