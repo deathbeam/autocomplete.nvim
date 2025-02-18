@@ -29,12 +29,7 @@ local function complete(prefix, cmp_start, items)
         local _, entry2_under = b.word:find('^_+')
         entry1_under = entry1_under or 0
         entry2_under = entry2_under or 0
-        if entry1_under > entry2_under then
-            return false
-        elseif entry1_under < entry2_under then
-            return true
-        end
-        return false
+        return entry1_under < entry2_under
     end)
 
     vim.fn.complete(cmp_start + 1, items)
