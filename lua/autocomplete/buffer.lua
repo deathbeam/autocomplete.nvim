@@ -109,7 +109,12 @@ local function complete_lsp(bufnr, prefix, cmp_start, client, char)
     params.context = context
     return util.request(client, methods.textDocument_completion, params, function(result)
         -- FIXME: Maybe dont use interal lsp functions? Idk why its not exposed and the parent method is marked as deprecated
-        local items = vim.lsp.completion._lsp_to_complete_items(result, prefix)
+        local items = {}
+        if vim.lsp._completion and vim.lsp._completion._lsp_to_complete_items then
+            items = vim.lsp._completion._lsp_to_complete_items(result, prefix)
+        else
+            items = vim.lsp.completion._lsp_to_complete_items(result, prefix)
+        end
         complete(prefix, cmp_start, items)
     end, bufnr)
 end
