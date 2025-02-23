@@ -30,13 +30,23 @@ local function signature_handler(client, result, bufnr)
 
     -- Highlight the active parameter.
     if hl then
-        vim.highlight.range(
-            fbuf,
-            state.ns,
-            'LspSignatureActiveParameter',
-            { hl[1], hl[2] },
-            { hl[3], hl[4] }
-        )
+        if vim.fn.has('nvim-0.11.0') == 1 then
+            vim.highlight.range(
+                fbuf,
+                state.ns,
+                'LspSignatureActiveParameter',
+                { hl[1], hl[2] },
+                { hl[3], hl[4] }
+            )
+        else
+            vim.api.nvim_buf_add_highlight(
+                fbuf,
+                state.ns,
+                'PmenuSel',
+                vim.startswith(lines[1], '```') and 1 or 0,
+                unpack(hl)
+            )
+        end
     end
 end
 
