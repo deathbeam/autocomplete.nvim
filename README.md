@@ -9,16 +9,6 @@ bugs by itself.
 
 https://github.com/deathbeam/autocomplete.nvim/assets/5115805/32e59389-baa8-417a-b5cb-26dddeb8786a
 
-## Requirements
-
-Requires **Neovim Nighly/development** version. This version supports stuff like popup menu
-for completion menu and closing windows properly from cmdline callbacks.  
-
-For installation instructions/repository go [here](https://github.com/neovim/neovim)
-
-If you want to use Tree-sitter autocompletion (as fallback when you dont have LSP server running) you also need to have
-[nvim-treesitter plugin](https://github.com/nvim-treesitter/nvim-treesitter)
-
 ## Installation
 
 Just use [lazy.nvim](https://github.com/folke/lazy.nvim) or `:h packages` with git submodules or something else I don't care.
@@ -27,8 +17,9 @@ Read the documentation of whatever you want to use.
 ## Usage
 
 Just require either buffer or cmd module or both and call setup on them.  
-**NOTE**: You dont need to provide the configuration, below is just default config, you can just
-call setup with no arguments for default.
+
+> [!NOTE]
+> You dont need to provide the configuration, below is just default config, you can just call setup with no arguments for default.
 
 ```lua
 -- LSP signature help
@@ -84,12 +75,3 @@ require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
     capabilities = capabilities
 }
 ```
-
-## Similar projects
-
-I used some of this projects as reference and they are also good alternatives:
-
-- https://github.com/nvimdev/epo.nvim
-- https://github.com/hrsh7th/nvim-cmp
-- https://github.com/smolck/command-completion.nvim
-- https://github.com/gelguy/wilder.nvim
