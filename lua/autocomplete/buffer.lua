@@ -7,7 +7,6 @@ local state = {
     entries = {
         completion = nil,
         info = nil,
-        edit = nil,
     },
 }
 
@@ -83,42 +82,6 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
     complete(prefix, cmp_start, items)
 end
 
-local function complete_lsp(bufnr, prefix, cmp_start, client, char)
-    local context = {
-        isRetrigger = true,
-        triggerKind = vim.lsp.protocol.CompletionTriggerKind.Invoked,
-        triggerCharacter = '',
-    }
-
-    -- Check if we are triggering completion automatically or on trigger character
-    if
-        vim.tbl_contains(
-            client.server_capabilities.completionProvider.triggerCharacters or {},
-            char
-        )
-    then
-        context = {
-            isRetrigger = true,
-            triggerKind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter,
-            triggerCharacter = char,
-        }
-    end
-
-    local params =
-        vim.lsp.util.make_position_params(vim.api.nvim_get_current_win(), client.offset_encoding)
-    params.context = context
-    return util.request(client, methods.textDocument_completion, params, function(result)
-        -- FIXME: Maybe dont use interal lsp functions? Idk why its not exposed and the parent method is marked as deprecated
-        local items = {}
-        if vim.lsp._completion and vim.lsp._completion._lsp_to_complete_items then
-            items = vim.lsp._completion._lsp_to_complete_items(result, prefix)
-        else
-            items = vim.lsp.completion._lsp_to_complete_items(result, prefix)
-        end
-        complete(prefix, cmp_start, items)
-    end, bufnr)
-end
-
 local function text_changed(args)
     if vim.fn.pumvisible() == 1 then
         return
@@ -134,8 +97,8 @@ local function text_changed(args)
 
     util.debounce(state.entries.completion, M.config.debounce_delay, function()
         local client = util.get_client(args.buf, methods.textDocument_completion)
-        if client then
-            complete_lsp(args.buf, prefix, cmp_start, client, line:sub(col, col))
+        if client and vim.lsp.completion and vim.lsp.completion.trigger then
+            vim.lsp.completion.trigger()
         else
             complete_treesitter(args.buf, prefix, cmp_start)
         end
@@ -155,16 +118,9 @@ local function complete_changed(args)
     local cur_info = vim.fn.complete_info()
     local selected = cur_info.selected
 
-    if
-        M.config.border
-        and cur_info.preview_winid
-        and vim.api.nvim_win_is_valid(cur_info.preview_winid)
-    then
-        vim.api.nvim_win_set_config(cur_info.preview_winid, { border = M.config.border })
-    end
-
     util.debounce(state.entries.info, M.config.debounce_delay, function()
-        local completion_item = vim.tbl_get(cur_item, 'user_data', 'nvim', 'lsp', 'completion_item')
+        local completion_item =
+            vim.tbl_get(cur_item or {}, 'user_data', 'nvim', 'lsp', 'completion_item')
         if not completion_item then
             return
         end
@@ -179,11 +135,8 @@ local function complete_changed(args)
             methods.completionItem_resolve,
             completion_item,
             function(result)
-                if
-                    not result.documentation
-                    or not result.documentation.value
-                    or #result.documentation.value == 0
-                then
+                local docs = vim.tbl_get(result, 'documentation', 'value')
+                if not docs or #docs == 0 then
                     return
                 end
 
@@ -192,19 +145,19 @@ local function complete_changed(args)
                     return
                 end
 
-                local wininfo =
-                    vim.api.nvim__complete_set(selected, { info = result.documentation.value })
-                if wininfo.winid and wininfo.bufnr then
-                    vim.wo[wininfo.winid].conceallevel = 2
-                    vim.wo[wininfo.winid].concealcursor = 'niv'
-                    vim.bo[wininfo.bufnr].syntax = 'markdown'
-                    vim.api.nvim_win_set_config(wininfo.winid, {
-                        border = M.config.border,
-                        focusable = false,
-                    })
-                    -- FIXME: Treesitter is *very* buggy with some LSPs, do not use. Already thought it was fixed once before but no
-                    -- vim.treesitter.start(wininfo.bufnr, 'markdown')
+                local wininfo = vim.api.nvim__complete_set(selected, { info = docs })
+                if not wininfo.winid or not wininfo.bufnr then
+                    return
                 end
+
+                vim.api.nvim_win_set_config(wininfo.winid, {
+                    border = M.config.border,
+                    focusable = false,
+                })
+
+                vim.treesitter.start(wininfo.bufnr, 'markdown')
+                vim.wo[wininfo.winid].conceallevel = 3
+                vim.wo[wininfo.winid].concealcursor = 'niv'
             end,
             args.buf
         )
@@ -221,7 +174,6 @@ function M.setup(config)
     M.config = vim.tbl_deep_extend('force', M.config, config or {})
     state.entries.completion = util.entry()
     state.entries.info = util.entry()
-    state.entries.edit = util.entry()
 
     local group = vim.api.nvim_create_augroup('LspCompletion', {})
 
@@ -248,7 +200,17 @@ function M.setup(config)
             if not vim.lsp.completion or not vim.lsp.completion.enable then
                 return
             end
-            vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = false })
+            vim.lsp.completion.enable(true, client.id, event.buf, {
+                autotrigger = false,
+                convert = function(item)
+                    if M.config.entry_mapper then
+                        ---@diagnostic disable-next-line: assign-type-mismatch
+                        item.kind = vim.lsp.protocol.CompletionItemKind[item.kind] or ''
+                        return M.config.entry_mapper(item)
+                    end
+                    return item
+                end,
+            })
         end,
     })
 end
