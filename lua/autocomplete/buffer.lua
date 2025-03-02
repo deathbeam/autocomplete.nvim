@@ -23,14 +23,6 @@ local function complete(prefix, cmp_start, items)
         items = vim.tbl_map(M.config.entry_mapper, items)
     end
 
-    table.sort(items, function(a, b)
-        local _, entry1_under = a.word:find('^_+')
-        local _, entry2_under = b.word:find('^_+')
-        entry1_under = entry1_under or 0
-        entry2_under = entry2_under or 0
-        return entry1_under < entry2_under
-    end)
-
     vim.fn.complete(cmp_start + 1, items)
 end
 
@@ -203,12 +195,20 @@ function M.setup(config)
             vim.lsp.completion.enable(true, client.id, event.buf, {
                 autotrigger = false,
                 convert = function(item)
+                    local entry = {
+                        abbr = item.label,
+                        kind = vim.lsp.protocol.CompletionItemKind[item.kind] or 'Unknown',
+                        menu = item.detail or '',
+                        icase = 1,
+                        dup = 0,
+                        empty = 0,
+                    }
+
                     if M.config.entry_mapper then
-                        ---@diagnostic disable-next-line: assign-type-mismatch
-                        item.kind = vim.lsp.protocol.CompletionItemKind[item.kind] or ''
-                        return M.config.entry_mapper(item)
+                        return M.config.entry_mapper(entry)
                     end
-                    return item
+
+                    return entry
                 end,
             })
         end,
