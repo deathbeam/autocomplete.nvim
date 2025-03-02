@@ -5,50 +5,7 @@ local M = {}
 
 local state = {
     entry = nil,
-    ns = nil,
 }
-
-local function signature_handler(client, result, bufnr)
-    local triggers = client.server_capabilities.signatureHelpProvider.triggerCharacters
-    local ft = vim.bo[bufnr].filetype
-    if not result.signatures or #result.signatures == 0 then
-        return
-    end
-    local lines, hl = vim.lsp.util.convert_signature_help_to_markdown_lines(result, ft, triggers)
-    if not lines or #lines == 0 then
-        return
-    end
-
-    local fbuf = vim.lsp.util.open_floating_preview(lines, 'markdown', {
-        focusable = false,
-        close_events = { 'CursorMoved', 'CursorMovedI', 'BufLeave', 'BufWinLeave' },
-        border = M.config.border,
-        max_width = M.config.width,
-        max_height = M.config.height,
-        anchor_bias = 'above',
-    })
-
-    -- Highlight the active parameter.
-    if hl then
-        if vim.fn.has('nvim-0.11.0') == 1 then
-            vim.highlight.range(
-                fbuf,
-                state.ns,
-                'LspSignatureActiveParameter',
-                { hl[1], hl[2] },
-                { hl[3], hl[4] }
-            )
-        else
-            vim.api.nvim_buf_add_highlight(
-                fbuf,
-                state.ns,
-                'PmenuSel',
-                vim.startswith(lines[1], '```') and 1 or 0,
-                unpack(hl)
-            )
-        end
-    end
-end
 
 local function cursor_moved(args)
     local line = vim.api.nvim_get_current_line()
@@ -63,35 +20,28 @@ local function cursor_moved(args)
     end
 
     local before_line = line:sub(1, col)
+    local has_trigger_char = vim.iter(
+        client.server_capabilities.signatureHelpProvider.triggerCharacters or {}
+    )
+        :filter(function(c)
+            return string.find(before_line, '[' .. c .. ']') ~= nil
+        end)
+        :next() ~= nil
 
-    -- Try to find signature help trigger character in current line
-    for _, c in ipairs(client.server_capabilities.signatureHelpProvider.triggerCharacters or {}) do
-        if string.find(before_line, '[' .. c .. ']') then
-            local params = vim.lsp.util.make_position_params(
-                vim.api.nvim_get_current_win(),
-                client.offset_encoding
-            )
-            params.context = {
-                isRetrigger = true,
-                triggerKind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter,
-                triggerCharacter = c,
-            }
-
-            util.debounce(state.entry, M.config.debounce_delay, function()
-                return util.request(
-                    client,
-                    methods.textDocument_signatureHelp,
-                    params,
-                    function(result)
-                        signature_handler(client, result, args.buf)
-                    end,
-                    args.buf
-                )
-            end)
-
-            return
-        end
+    if not has_trigger_char then
+        return
     end
+
+    util.debounce(state.entry, M.config.debounce_delay, function()
+        vim.lsp.buf.signature_help({
+            focusable = false,
+            close_events = { 'CursorMoved', 'CursorMovedI', 'BufLeave', 'BufWinLeave' },
+            border = M.config.border,
+            max_width = M.config.width,
+            max_height = M.config.height,
+            anchor_bias = 'above',
+        })
+    end)
 end
 
 M.config = {
@@ -103,13 +53,11 @@ M.config = {
 
 function M.setup(config)
     M.config = vim.tbl_deep_extend('force', M.config, config or {})
-    state.ns = vim.api.nvim_create_namespace('LspSignatureHelp')
     state.entry = util.entry()
-    local group = vim.api.nvim_create_augroup('LspSignatureHelp', {})
 
     vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
         desc = 'Auto show LSP signature help',
-        group = group,
+        group = vim.api.nvim_create_augroup('LspSignatureHelp', {}),
         callback = cursor_moved,
     })
 end
