@@ -1,8 +1,7 @@
 local M = {}
 
 function M.setup()
-    local term = vim.api.nvim_replace_termcodes('<C-z>', true, true, true)
-    local completing = false
+    local term = vim.api.nvim_replace_termcodes('<C-@>', true, true, true)
 
     vim.opt.wildmenu = true
     vim.opt.wildmode = 'noselect:lastused,full'
@@ -26,13 +25,10 @@ function M.setup()
                 and last_char:match('[%w%/%: ]')
                 and not cmdline:match('^%d+$')
             then
-                vim.opt.eventignore:append('CmdlineChanged')
                 vim.api.nvim_feedkeys(term, 'ti', false)
+                vim.opt.eventignore:append('CmdlineChanged')
                 vim.schedule(function()
-                    local current_cmdline = vim.fn.getcmdline()
-                    if current_cmdline:match('\026$') or current_cmdline:match('\x1A$') then
-                        vim.fn.setcmdline(cmdline)
-                    end
+                    vim.fn.setcmdline(vim.fn.substitute(vim.fn.getcmdline(), '\\%x00', '', 'g'))
                     vim.opt.eventignore:remove('CmdlineChanged')
                 end)
             end
