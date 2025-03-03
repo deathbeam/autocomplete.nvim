@@ -167,7 +167,7 @@ function M.setup(config)
     state.entries.completion = util.entry()
     state.entries.info = util.entry()
 
-    local group = vim.api.nvim_create_augroup('LspCompletion', {})
+    local group = vim.api.nvim_create_augroup('autocomplete-buffer', {})
 
     vim.api.nvim_create_autocmd('TextChangedI', {
         desc = 'Auto show completion',

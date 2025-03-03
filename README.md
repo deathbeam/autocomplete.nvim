@@ -14,6 +14,9 @@ https://github.com/deathbeam/autocomplete.nvim/assets/5115805/32e59389-baa8-417a
 Just use [lazy.nvim](https://github.com/folke/lazy.nvim) or `:h packages` with git submodules or something else I don't care.
 Read the documentation of whatever you want to use.
 
+> [!WARNING]
+> `cmd` completion requires latest Neovim 0.11+ (e.g nightly)
+
 ## Usage
 
 Just require either buffer or cmd module or both and call setup on them.  
@@ -38,20 +41,7 @@ require("autocomplete.buffer").setup {
 }
 
 -- cmdline autocompletion
-require("autocomplete.cmd").setup {
-    mappings = {
-        accept = '<C-y>',
-        reject = '<C-e>',
-        complete = '<C-space>',
-        next = '<C-n>',
-        previous = '<C-p>',
-    },
-    border = nil, -- Cmdline completion border style
-    columns = 5, -- Number of columns per row
-    rows = 0.3, -- Number of rows, if < 1 then its fraction of total vim lines, if > 1 then its absolute number
-    close_on_done = true, -- Close completion window when done (accept/reject)
-    debounce_delay = 100,
-}
+require("autocomplete.cmd").setup()
 ```
 
 You also probably want to enable `popup` in completeopt to show documentation preview:
