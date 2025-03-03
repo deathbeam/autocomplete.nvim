@@ -16,7 +16,7 @@ function M.setup(config)
     local entry = util.entry()
     vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
         desc = 'Auto show LSP signature help',
-        group = vim.api.nvim_create_augroup('LspSignatureHelp', {}),
+        group = vim.api.nvim_create_augroup('autocomplete-signature', {}),
         callback = function(args)
             local line = vim.api.nvim_get_current_line()
             local col = vim.api.nvim_win_get_cursor(0)[2]
