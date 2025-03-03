@@ -3,9 +3,9 @@ local M = {}
 function M.setup()
     local term = vim.api.nvim_replace_termcodes('<C-@>', true, true, true)
 
+    vim.cmd([[set wildcharm=<C-@>]])
     vim.opt.wildmenu = true
     vim.opt.wildmode = 'noselect:lastused,full'
-    vim.opt.wildcharm = vim.fn.char2nr(term)
 
     vim.keymap.set('c', '<Up>', '<End><C-U><Up>', { silent = true })
     vim.keymap.set('c', '<Down>', '<End><C-U><Down>', { silent = true })
