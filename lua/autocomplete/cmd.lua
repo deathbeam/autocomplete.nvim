@@ -17,12 +17,12 @@ function M.setup()
         callback = function()
             local cmdline = vim.fn.getcmdline()
             local curpos = vim.fn.getcmdpos()
-            local last_char = cmdline:sub(-1)
+            local last_char = cmdline:sub(curpos - 1, curpos - 1)
 
             if
                 curpos == #cmdline + 1
                 and vim.fn.pumvisible() == 0
-                and last_char:match('[%w%/%: ]')
+                and last_char:match('[%w%/%:- ]')
                 and not cmdline:match('^%d+$')
             then
                 vim.api.nvim_feedkeys(term, 'ti', false)

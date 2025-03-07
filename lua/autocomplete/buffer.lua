@@ -37,20 +37,14 @@ local function complete_treesitter(bufnr, prefix, cmp_start)
     local defs = locals.get_definitions_lookup_table(bufnr)
     local ft = vim.bo[bufnr].filetype
     local items = {}
+    local kind_map = vim.tbl_map(string.lower, vim.tbl_keys(vim.lsp.protocol.CompletionItemKind))
 
     for id, entry in pairs(defs) do
-        -- FIXME: This is not pretty, the format of the ID is not documented and might change, but its fastest way
         local name = id:match('k_(.+)_%d+_%d+_%d+_%d+$')
         local node = entry.node
         local kind = entry.kind
         if node and kind then
-            for _, k in ipairs(vim.lsp.protocol.CompletionItemKind) do
-                if string.find(k:lower(), kind:lower()) then
-                    kind = k
-                    break
-                end
-            end
-
+            kind = kind_map[kind:lower()] or kind
             local start_line_node, _, _ = node:start()
             local end_line_node, _, _ = node:end_()
 
