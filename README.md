@@ -1,3 +1,6 @@
+> [!WARNING]
+> Plugin moved to https://github.com/deathbeam/myplugins.nvim, all development will continue there
+
 # autocomplete.nvim
 Very simple and minimal autocompletion for cmdline and buffer using LSP and Tree-sitter with signature help.  
 
